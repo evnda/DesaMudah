@@ -1,0 +1,124 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Pengajuan Saya - DesaMudah{% endblock %}
+
+{% block content %}
+
+<div class="form-card">
+
+    <h2>Pengajuan Saya</h2>
+
+    <p>
+        Berikut merupakan daftar pengajuan layanan
+        administrasi yang pernah kamu kirim.
+    </p>
+
+    {% if pengajuan %}
+
+        {% for item in pengajuan %}
+
+        <div class="layanan-item pengajuan-card">
+
+            <h3>{{ item.nama_layanan }}</h3>
+
+            <p>
+                <strong>Nomor Pengajuan:</strong><br>
+                {{ item.nomor_pengajuan }}
+            </p>
+
+            <p>
+                <strong>Tanggal Pengajuan:</strong><br>
+                {{ item.tanggal_pengajuan }}
+            </p>
+
+            <p>
+                <strong>Status:</strong><br>
+
+                {% if item.status == 'menunggu_verifikasi' %}
+                    Menunggu Verifikasi
+
+                {% elif item.status == 'perlu_perbaikan' %}
+                    Perlu Perbaikan
+
+                {% elif item.status == 'sedang_diproses' %}
+                    Sedang Diproses
+
+                {% elif item.status == 'menunggu_persetujuan' %}
+                    Menunggu Persetujuan Kepala Desa
+
+                {% elif item.status == 'selesai' %}
+                    Selesai
+
+                {% elif item.status == 'ditolak' %}
+                    Ditolak
+                {% endif %}
+            </p>
+
+            {% if item.status == 'perlu_perbaikan' %}
+
+                <hr>
+
+                <strong>Catatan Admin:</strong>
+
+                <p>
+                    {{ item.catatan_admin or
+                    'Silakan hubungi admin desa untuk informasi lebih lanjut.' }}
+                </p>
+
+            {% elif item.status == 'ditolak' %}
+
+                <hr>
+
+                <strong>Alasan Penolakan:</strong>
+
+                <p>
+                    {{ item.catatan_admin or 'Tidak ada keterangan.' }}
+                </p>
+
+            {% elif item.status == 'selesai' %}
+
+                <div class="hasil-card">
+
+                    <h4>Dokumen Hasil Pengajuan</h4>
+
+                    {% if item.hasil_dokumen %}
+
+                        <p>
+                            Dokumen hasil untuk layanan
+                            <strong>{{ item.nama_layanan }}</strong>
+                            sudah tersedia.
+                        </p>
+
+                        <a href="{{ url_for('unduh_hasil_pengajuan', id=item.id) }}"
+                           class="btn-unduh">
+                            Unduh Dokumen Hasil
+                        </a>
+
+                    {% else %}
+
+                        <p>Dokumen hasil belum tersedia.</p>
+
+                    {% endif %}
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>Kamu belum memiliki pengajuan layanan.</p>
+
+    {% endif %}
+
+    <a href="{{ url_for('dashboard') }}">
+        Kembali ke Dashboard
+    </a>
+
+</div>
+
+{% endblock %}

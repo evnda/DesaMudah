@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - DesaMudah{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h2>Login DesaMudah</h2>
+    <p>Masuk ke akun untuk melanjutkan.</p>
+
+    <form method="POST">
+        <label>Email</label>
+        <input type="email" name="email" required>
+
+        <label>Password</label>
+        <input type="password" name="password" required>
+
+        <button type="submit">Masuk</button>
+    </form>
+
+    <p>Belum punya akun? <a href="{{ url_for('register') }}">Daftar</a></p>
+</div>
+{% endblock %}

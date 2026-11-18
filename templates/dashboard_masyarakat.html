@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Masyarakat{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h2>Dashboard Masyarakat</h2>
+    <h3>Halo, {{ session.get('nama') }}!</h3>
+    <p>Selamat datang di DesaMudah.</p>
+
+    <p>Silakan gunakan layanan berikut:</p>
+   <ul>
+    <li>
+        <ul>
+    <li>   
+        <a href="{{ url_for('daftar_notifikasi') }}">
+            Notifikasi Saya
+        </a>
+    </li> 
+
+    <li>
+        <a href="{{ url_for('daftar_layanan') }}">
+            Informasi Layanan Desa
+        </a>
+    </li>
+
+    <li>
+        <a href="{{ url_for('pengajuan_saya') }}">
+            Pengajuan Saya / Cek Status
+        </a>
+    </li>
+
+    <li>Chatbot DesaMudah</li>
+</ul>
+
+    <a href="{{ url_for('logout') }}">Logout</a>
+</div>
+{% endblock %}

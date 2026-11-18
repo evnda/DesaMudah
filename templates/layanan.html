@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Informasi Layanan - DesaMudah{% endblock %}
+
+{% block content %}
+
+<div class="form-card">
+    <h2>Informasi Layanan Desa</h2>
+
+    <p>
+        Temukan berbagai layanan administrasi yang tersedia
+        di DesaMudah. Pilih layanan untuk melihat informasi
+        dan persyaratan pengajuannya.
+    </p>
+
+    <div class="layanan-container">
+
+        {% for item in layanan %}
+
+        <div class="layanan-item">
+
+            <h3>{{ item.nama_layanan }}</h3>
+
+            <p>{{ item.kategori }}</p>
+
+            <p>{{ item.deskripsi or 'Informasi layanan tersedia.' }}</p>
+
+            <p>
+                Estimasi:
+                {{ item.estimasi_hari or 3 }} hari kerja
+            </p>
+
+            <a href="{{ url_for('detail_layanan', id=item.id) }}">
+                Lihat Detail
+            </a>
+
+        </div>
+
+        {% else %}
+
+        <p>Belum ada layanan yang tersedia.</p>
+
+        {% endfor %}
+
+    </div>
+</div>
+
+{% endblock %}

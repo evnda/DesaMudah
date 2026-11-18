@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Formulir Pengajuan - DesaMudah{% endblock %}
+
+{% block content %}
+
+<div class="form-card">
+
+    <h2>Formulir Pengajuan</h2>
+
+    <h3>{{ layanan.nama_layanan }}</h3>
+
+    <p>Silakan lengkapi data berikut untuk mengajukan layanan.</p>
+
+    <form method="POST" enctype="multipart/form-data">
+
+        <label>Nama Lengkap</label>
+        <input
+            type="text"
+            name="nama_lengkap"
+            value="{{ session.get('nama', '') }}"
+            required
+        >
+
+        <label>NIK (Data Dummy)</label>
+        <input
+            type="text"
+            name="nik_dummy"
+            placeholder="Masukkan NIK simulasi"
+        >
+
+        <label>Alamat</label>
+        <textarea name="alamat" required></textarea>
+
+        <label>Nomor HP</label>
+        <input type="text" name="no_hp" required>
+
+        <label>Keterangan Tambahan</label>
+        <textarea name="keterangan"></textarea>
+
+        <hr>
+
+        <h3>Upload Dokumen Persyaratan</h3>
+
+        {% for item in persyaratan %}
+
+            <div class="form-group">
+
+                <label>
+                    {{ loop.index }}. {{ item.nama_persyaratan }}
+                </label>
+
+                <p>{{ item.keterangan }}</p>
+
+                <input
+                    type="file"
+                    name="dokumen"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    required
+                >
+
+            </div>
+
+        {% endfor %}
+
+        <p>Format PDF/JPG/PNG, maksimal 2 MB per dokumen.</p>
+
+        <button type="submit">
+            Kirim Pengajuan
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifikasi - DesaMudah{% endblock %}
+
+{% block content %}
+
+<div class="form-card" style="max-width: 750px;">
+
+    <h2>Notifikasi Saya</h2>
+
+    <p>Berikut pemberitahuan terkait pengajuan layanan kamu.</p>
+
+    {% if notifikasi %}
+
+        {% for item in notifikasi %}
+
+        {% if item.sudah_dibaca == 0 %}
+    <form action="{{ url_for('baca_notifikasi', id=item.id) }}" method="POST">
+        <button type="submit">Tandai Sudah Dibaca</button>
+    </form>
+        {% else %}
+            <small>Sudah dibaca</small>
+        {% endif %}
+        
+        <div class="layanan-item notification-card
+            {% if item.sudah_dibaca == 0 %}
+                belum-dibaca
+            {% else %}
+                sudah-dibaca
+            {% endif %}">
+
+            <h3>{{ item.judul }}</h3>
+
+            <p>{{ item.pesan }}</p>
+
+            <small style="color: #718096;">
+                {{ item.created_at }}
+            </small>
+
+            {% if item.sudah_dibaca == 0 %}
+                <p style="color: #2878c7; font-size: 13px;">
+                    ● Belum dibaca
+                </p>
+            {% else %}
+                <p style="color: #718096; font-size: 13px;">
+                    Sudah dibaca
+                </p>
+            {% endif %}
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>Belum ada notifikasi.</p>
+
+    {% endif %}
+
+    <a href="{{ url_for('dashboard') }}">Kembali ke Dashboard</a>
+
+</div>
+
+{% endblock %}

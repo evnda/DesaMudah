@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Persetujuan Kepala Desa - DesaMudah{% endblock %}
+
+{% block content %}
+
+<div class="form-card">
+
+    <h2>Persetujuan Kepala Desa</h2>
+
+    <p>
+        Daftar pengajuan masyarakat yang sudah diverifikasi
+        admin dan membutuhkan persetujuan kepala desa.
+    </p>
+
+    {% if pengajuan %}
+
+        {% for item in pengajuan %}
+
+        <div class="layanan-item">
+
+            <h3>{{ item.nama_layanan }}</h3>
+
+            <p>
+                <strong>Nomor Pengajuan:</strong><br>
+                {{ item.nomor_pengajuan }}
+            </p>
+
+            <p>
+                <strong>Nama Pemohon:</strong><br>
+                {{ item.nama }}
+            </p>
+
+            <p>
+                <strong>Tanggal Pengajuan:</strong><br>
+                {{ item.tanggal_pengajuan }}
+            </p>
+
+            <p>
+                <strong>Status:</strong><br>
+                Menunggu Persetujuan Kepala Desa
+            </p>
+
+            <a href="{{ url_for('detail_persetujuan', id=item.id) }}">
+                Periksa Pengajuan
+            </a>
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>Belum ada pengajuan yang menunggu persetujuan.</p>
+
+    {% endif %}
+
+    <a href="{{ url_for('dashboard') }}">
+        Kembali ke Dashboard
+    </a>
+
+</div>
+
+{% endblock %}

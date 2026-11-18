@@ -1,0 +1,59 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Detail Layanan - DesaMudah{% endblock %}
+
+{% block content %}
+
+<div class="form-card">
+
+    <h2>{{ layanan.nama_layanan }}</h2>
+
+    <p>
+        <strong>Kategori:</strong>
+        {{ layanan.kategori }}
+    </p>
+
+    <h3>Deskripsi Layanan</h3>
+    <p>{{ layanan.deskripsi or 'Belum tersedia.' }}</p>
+
+    <h3>Persyaratan Dokumen</h3>
+
+    {% if persyaratan %}
+        <ul>
+            {% for item in persyaratan %}
+                <li>
+                    <strong>{{ item.nama_persyaratan }}</strong>
+                    <p>{{ item.keterangan or '-' }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Belum ada persyaratan yang tersedia.</p>
+    {% endif %}
+
+    <h3>Prosedur Pengajuan</h3>
+    <p>{{ layanan.prosedur or 'Belum tersedia.' }}</p>
+
+    <h3>Estimasi Waktu</h3>
+    <p>{{ layanan.estimasi_hari or 3 }} hari kerja</p>
+
+    {% if layanan.perlu_persetujuan %}
+        <p>Layanan ini memerlukan persetujuan Kepala Desa.</p>
+    {% else %}
+        <p>Layanan ini diproses oleh petugas desa.</p>
+    {% endif %}
+
+{% if session.get('role') == 'masyarakat' %}
+    <a href="{{ url_for('ajukan_layanan', id=layanan.id) }}">
+        <button type="button">Ajukan Layanan Ini</button>
+    </a>
+{% endif %}
+
+    <a href="{{ url_for('daftar_layanan') }}">
+        Kembali ke Daftar Layanan
+    </a>
+
+</div>
+
+{% endblock %}

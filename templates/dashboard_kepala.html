@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Kepala Desa{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h2>Dashboard Kepala Desa</h2>
+    <h3>Halo, {{ session.get('nama') }}!</h3>
+    <p>Selamat datang di halaman Kepala Desa.</p>
+
+    <ul>
+        <li>Pengajuan Menunggu Persetujuan</li>
+        <li>Riwayat Persetujuan</li>
+        <li>Rekap Pelayanan Desa</li>
+    </ul>
+<li>
+    <a href="{{ url_for('daftar_persetujuan') }}">
+        Persetujuan Pengajuan
+    </a>
+</li>
+    <a href="{{ url_for('logout') }}">Logout</a>
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Admin{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h2>Dashboard Admin Desa</h2>
+    <h3>Halo, {{ session.get('nama') }}!</h3>
+    <p>Selamat datang di halaman administrasi DesaMudah.</p>
+
+    <ul>
+        <li>Kelola Data Layanan</li>
+        <li>Kelola Persyaratan</li>
+        <li>Verifikasi Pengajuan</li>
+        <li>Kelola Status Pengajuan</li>
+        <li>Lihat Rekap Pengajuan</li>
+          <li>
+    <a href="{{ url_for('admin_pengajuan') }}">
+        Kelola Pengajuan Masyarakat
+    </a>
+</li>
+    </ul>
+
+  
+
+    <a href="{{ url_for('logout') }}">Logout</a>
+</div>
+{% endblock %}

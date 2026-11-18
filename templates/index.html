@@ -1,0 +1,28 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Beranda - DesaMudah{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h1>Selamat Datang di DesaMudah</h1>
+
+    <p>
+        Sistem Informasi Pelayanan Administrasi Desa
+        Berbasis Web.
+    </p>
+
+    <p>
+        Temukan informasi pelayanan dan ajukan
+        kebutuhan administrasi secara online.
+    </p>
+
+    <a href="{{ url_for('register') }}">
+        <button type="button">Daftar Sekarang</button>
+    </a>
+
+    <a href="{{ url_for('login') }}">
+        <button type="button">Login</button>
+    </a>
+</div>
+{% endblock %}

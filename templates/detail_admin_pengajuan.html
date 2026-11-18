@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}Detail Pengajuan - DesaMudah{% endblock %}
+
+{% block content %}
+
+<div class="form-card">
+
+    <h2>Detail Pengajuan Masyarakat</h2>
+
+    <h3>{{ pengajuan.nama_layanan }}</h3>
+
+    <p>
+        <strong>Nomor Pengajuan:</strong><br>
+        {{ pengajuan.nomor_pengajuan }}
+    </p>
+
+    <p>
+        <strong>Nama Pemohon:</strong><br>
+        {{ pengajuan.nama }}
+    </p>
+
+    <p>
+        <strong>Email:</strong><br>
+        {{ pengajuan.email }}
+    </p>
+
+    <p>
+        <strong>Status:</strong><br>
+        {{ pengajuan.status.replace('_', ' ').title() }}
+    </p>
+
+    <hr>
+
+    <h3>Data Formulir</h3>
+
+    {% for key, value in data_formulir.items() %}
+        <p>
+            <strong>{{ key.replace('_', ' ').title() }}:</strong><br>
+            {{ value }}
+        </p>
+    {% endfor %}
+
+    <hr>
+
+    <h3>Dokumen Persyaratan</h3>
+
+    {% if dokumen %}
+        {% for file in dokumen %}
+            <div class="layanan-item">
+                <p><strong>{{ file.nama_file }}</strong></p>
+                <p>Tipe: {{ file.tipe_file }}</p>
+                <p>Ukuran: {{ file.ukuran_file }} byte</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Belum ada dokumen yang diunggah.</p>
+    {% endif %}
+
+    <hr>
+
+    <h3>Riwayat Status</h3>
+
+    {% if riwayat %}
+        {% for item in riwayat %}
+            <div class="layanan-item">
+                <p><strong>{{ item.status.replace('_', ' ').title() }}</strong></p>
+                <p>Petugas: {{ item.nama_aktor or 'Sistem' }}</p>
+                <p>Catatan: {{ item.catatan or '-' }}</p>
+                <p>Waktu: {{ item.created_at }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Belum ada riwayat status.</p>
+    {% endif %}
+
+
+{% if pengajuan.status == 'menunggu_verifikasi' %}
+
+<hr>
+
+<h3>Tindakan Admin</h3>
+
+<form method="POST"
+      action="{{ url_for('proses_pengajuan', id=pengajuan.id) }}">
+
+    <label for="catatan">Catatan Admin:</label>
+
+    <textarea
+        name="catatan"
+        id="catatan"
+        rows="4"
+        placeholder="Isi catatan jika meminta perbaikan atau menolak pengajuan..."
+    ></textarea>
+
+    <br><br>
+
+    <button type="submit"
+            name="aksi"
+            value="terima">
+        Terima Pengajuan
+    </button>
+
+    <button type="submit"
+            name="aksi"
+            value="perbaikan">
+        Minta Perbaikan
+    </button>
+
+    <button type="submit"
+            name="aksi"
+            value="tolak">
+        Tolak Pengajuan
+    </button>
+
+</form>
+
+{% else %}
+
+<p>Pengajuan ini sudah diproses oleh admin.</p>
+
+{% endif %}
+
+{% if pengajuan.status == 'sedang_diproses' %}
+    <hr>
+
+    <h3>Selesaikan Pengajuan</h3>
+
+    <p>
+        Unggah dokumen hasil sebagai tanda bahwa
+        pengajuan masyarakat sudah selesai diproses.
+    </p>
+
+    <form method="POST"
+          action="{{ url_for('selesaikan_pengajuan', id=pengajuan.id) }}"
+          enctype="multipart/form-data">
+
+        <label>Dokumen Hasil:</label>
+
+        <input type="file"
+               name="hasil_dokumen"
+               accept=".pdf,.jpg,.jpeg,.png"
+               required>
+
+        <br><br>
+
+        <button type="submit">
+            Selesaikan Pengajuan
+        </button>
+
+    </form>
+{% endif %}
+
+
+    <a href="{{ url_for('admin_pengajuan') }}">
+        Kembali ke Daftar Pengajuan
+    </a>
+
+</div>
+
+{% endblock %}

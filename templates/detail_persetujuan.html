@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}Detail Persetujuan - DesaMudah{% endblock %}
+
+{% block content %}
+
+<div class="form-card">
+
+    <h2>Pemeriksaan Pengajuan</h2>
+
+    <h3>{{ pengajuan.nama_layanan }}</h3>
+
+    <p>
+        <strong>Nomor Pengajuan:</strong><br>
+        {{ pengajuan.nomor_pengajuan }}
+    </p>
+
+    <p>
+        <strong>Nama Pemohon:</strong><br>
+        {{ pengajuan.nama }}
+    </p>
+
+    <p>
+        <strong>Email:</strong><br>
+        {{ pengajuan.email }}
+    </p>
+
+    <p>
+        <strong>Status:</strong><br>
+        Menunggu Persetujuan Kepala Desa
+    </p>
+
+    <hr>
+
+    <h3>Data Formulir</h3>
+
+    {% for key, value in data_formulir.items() %}
+        <p>
+            <strong>{{ key.replace('_', ' ').title() }}:</strong><br>
+            {{ value }}
+        </p>
+    {% endfor %}
+
+    <hr>
+
+    <h3>Dokumen Persyaratan</h3>
+
+    {% if dokumen %}
+        {% for file in dokumen %}
+            <div class="layanan-item">
+                <p><strong>{{ file.nama_file }}</strong></p>
+                <p>Tipe: {{ file.tipe_file }}</p>
+                <p>Ukuran: {{ file.ukuran_file }} byte</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Belum ada dokumen.</p>
+    {% endif %}
+
+    <hr>
+
+    <h3>Riwayat Pengajuan</h3>
+
+    {% for item in riwayat %}
+        <div class="layanan-item">
+            <p><strong>{{ item.status.replace('_', ' ').title() }}</strong></p>
+            <p>Petugas: {{ item.nama_aktor or 'Sistem' }}</p>
+            <p>Catatan: {{ item.catatan or '-' }}</p>
+            <p>Waktu: {{ item.created_at }}</p>
+        </div>
+    {% endfor %}
+
+
+<hr>
+
+<h3>Keputusan Kepala Desa</h3>
+
+<form method="POST"
+      action="{{ url_for('proses_persetujuan', id=pengajuan.id) }}">
+
+    <label for="catatan">Catatan / Alasan Keputusan:</label>
+
+    <textarea
+        name="catatan"
+        id="catatan"
+        rows="4"
+        placeholder="Isi alasan jika pengajuan ditolak..."
+    ></textarea>
+
+    <br><br>
+
+    <button type="submit"
+            name="keputusan"
+            value="disetujui">
+        Setujui Pengajuan
+    </button>
+
+    <button type="submit"
+            name="keputusan"
+            value="ditolak">
+        Tolak Pengajuan
+    </button>
+
+</form>
+
+    <a href="{{ url_for('daftar_persetujuan') }}">
+        Kembali ke Daftar Persetujuan
+    </a>
+
+</div>
+
+{% endblock %}
