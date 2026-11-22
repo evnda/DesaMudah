@@ -1,0 +1,115 @@
+  {% extends 'base.html' %}
+
+{% block title %}Rekap Pelayanan Desa{% endblock %}
+
+{% block content %}
+<div class="form-card">
+
+    <h2>Rekap Pelayanan Desa</h2>
+
+    <button onclick="window.print()" class="btn-cetak">
+        Cetak Laporan
+    </button>
+
+    <p>
+        Halaman ini menampilkan ringkasan pengajuan masyarakat
+        yang pernah diteruskan oleh Admin kepada Kepala Desa.
+    </p>
+
+    <hr>
+
+    <h3>Ringkasan Pengajuan</h3>
+
+    <div class="layanan-item">
+        <h4>Total Pengajuan Diteruskan</h4>
+        <h2>{{ ringkasan.total_pengajuan }}</h2>
+    </div>
+
+    <div class="layanan-item">
+        <h4>Menunggu Persetujuan</h4>
+        <h2>{{ ringkasan.menunggu }}</h2>
+    </div>
+
+    <div class="layanan-item">
+        <h4>Sudah Disetujui Kepala Desa</h4>
+        <h2>{{ ringkasan.disetujui }}</h2>
+    </div>
+
+    <div class="layanan-item">
+        <h4>Ditolak Kepala Desa</h4>
+        <h2>{{ ringkasan.ditolak }}</h2>
+    </div>
+
+    <div class="layanan-item">
+        <h4>Pengajuan Selesai</h4>
+        <h2>{{ ringkasan.selesai }}</h2>
+    </div>
+
+    <hr>
+
+    <h3>Rekap Berdasarkan Jenis Layanan</h3>
+
+    {% if rekap_layanan %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Nama Layanan</th>
+                    <th>Jumlah Pengajuan</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in rekap_layanan %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ item.nama_layanan }}</td>
+                    <td>{{ item.jumlah }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <p>Belum ada data rekap pelayanan.</p>
+    {% endif %}
+
+    <br>
+
+    <a href="{{ url_for('dashboard') }}">
+        Kembali ke Dashboard
+    </a>
+
+</div>
+{% endblock %}
+
+<style>
+.btn-cetak {
+    background-color: #2563eb;
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+@media print {
+    .btn-cetak,
+    nav,
+    header,
+    footer {
+        display: none !important;
+    }
+
+    body {
+        background: white !important;
+    }
+
+    .form-card {
+        box-shadow: none !important;
+        border: none !important;
+    }
+}
+</style>

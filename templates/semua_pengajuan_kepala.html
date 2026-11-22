@@ -1,0 +1,59 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Semua Pengajuan Diteruskan{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h2>Semua Pengajuan Diteruskan</h2>
+    <p>
+        Berikut adalah seluruh pengajuan masyarakat yang pernah diteruskan
+        Admin kepada Kepala Desa.
+    </p>
+
+    <p>
+        Jumlah pengajuan:
+        <strong>{{ pengajuan|length }}</strong>
+    </p>
+
+    {% if pengajuan %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Nomor Pengajuan</th>
+                    <th>Nama Pemohon</th>
+                    <th>Jenis Layanan</th>
+                    <th>Tanggal Pengajuan</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in pengajuan %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ item.nomor_pengajuan }}</td>
+                    <td>{{ item.nama }}</td>
+                    <td>{{ item.nama_layanan }}</td>
+                    <td>
+                        {{ item.tanggal_pengajuan.strftime('%d-%m-%Y')
+                        if item.tanggal_pengajuan else '-' }}
+                    </td>
+                    <td>
+                        {{ item.status.replace('_', ' ').title() }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <p>Belum ada pengajuan yang diteruskan kepada Kepala Desa.</p>
+    {% endif %}
+
+    <br>
+    <a href="{{ url_for('dashboard') }}">Kembali ke Dashboard</a>
+</div>
+{% endblock %}

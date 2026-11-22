@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Kelola Status Pengajuan{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h2>Kelola Status Pengajuan</h2>
+    <p>Pantau perkembangan pengajuan masyarakat yang telah diverifikasi.</p>
+
+    <p>
+        <strong>Total pengajuan:</strong> {{ pengajuan|length }}
+    </p>
+
+    {% if pengajuan %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Nomor Pengajuan</th>
+                    <th>Nama Pemohon</th>
+                    <th>Layanan</th>
+                    <th>Tanggal</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in pengajuan %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ item.nomor_pengajuan }}</td>
+                    <td>{{ item.nama }}</td>
+                    <td>{{ item.nama_layanan }}</td>
+                    <td>
+                        {{ item.tanggal_pengajuan.strftime('%d-%m-%Y') if item.tanggal_pengajuan else '-' }}
+                    </td>
+                    <td>
+                        {{ item.status.replace('_', ' ')|title }}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('detail_status_pengajuan', id=item.id) }}">
+                            Lihat Detail
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <p>Belum ada pengajuan yang masuk tahap pemrosesan.</p>
+    {% endif %}
+
+    <br>
+    <a href="{{ url_for('dashboard') }}">Kembali ke Dashboard</a>
+</div>
+{% endblock %}

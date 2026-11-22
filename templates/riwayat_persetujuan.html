@@ -1,0 +1,47 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Riwayat Persetujuan{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h2>Riwayat Persetujuan</h2>
+    <p>Daftar pengajuan yang sudah diputuskan oleh Kepala Desa.</p>
+
+    <p>Jumlah riwayat: <strong>{{ pengajuan|length }}</strong></p>
+
+    {% if pengajuan %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Nomor Pengajuan</th>
+                    <th>Nama Pemohon</th>
+                    <th>Layanan</th>
+                    <th>Keputusan</th>
+                    <th>Catatan</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in pengajuan %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ item.nomor_pengajuan }}</td>
+                    <td>{{ item.nama }}</td>
+                    <td>{{ item.nama_layanan }}</td>
+                    <td>{{ item.keputusan|replace('_', ' ')|title }}</td>
+                    <td>{{ item.catatan or '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <p>Belum ada riwayat persetujuan.</p>
+    {% endif %}
+
+    <br>
+    <a href="{{ url_for('dashboard') }}">Kembali ke Dashboard</a>
+</div>
+{% endblock %}

@@ -1,0 +1,88 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Statistik Pelayanan Desa{% endblock %}
+
+{% block content %}
+<div class="form-card">
+
+    <h2>Statistik Pelayanan Desa</h2>
+
+    <p>
+        Grafik ini menampilkan jumlah pengajuan masyarakat
+        yang pernah diteruskan kepada Kepala Desa berdasarkan status terakhir.
+    </p>
+
+    <hr>
+
+    <div style="width: 100%; max-width: 750px; margin: 25px auto;">
+        <canvas id="grafikStatistik"></canvas>
+    </div>
+
+    <br>
+
+    <a href="{{ url_for('dashboard') }}">
+        Kembali ke Dashboard
+    </a>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const dataStatistik = JSON.parse(
+    '{{ data_statistik | tojson | safe }}'
+);
+    const labelStatus = dataStatistik.map(item => {
+        const namaStatus = {
+            'menunggu_verifikasi': 'Menunggu Verifikasi',
+            'menunggu_persetujuan': 'Menunggu Persetujuan',
+            'sedang_diproses': 'Sedang Diproses',
+            'selesai': 'Selesai',
+            'perlu_perbaikan': 'Perlu Perbaikan',
+            'ditolak': 'Ditolak'
+        };
+
+        return namaStatus[item.status] || item.status;
+    });
+
+    const jumlahPengajuan = dataStatistik.map(item => item.jumlah);
+
+    new Chart(document.getElementById('grafikStatistik'), {
+        type: 'bar',
+        data: {
+            labels: labelStatus,
+            datasets: [{
+                label: 'Jumlah Pengajuan',
+                data: jumlahPengajuan,
+                backgroundColor: [
+                    '#60a5fa',
+                    '#818cf8',
+                    '#fbbf24',
+                    '#34d399',
+                    '#fb923c',
+                    '#f87171'
+                ],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}Detail Status Pengajuan{% endblock %}
+
+{% block content %}
+
+<div class="form-card">
+
+    <h2>Detail Status Pengajuan</h2>
+    <p>Halaman pemantauan perkembangan pengajuan masyarakat.</p>
+
+    <hr>
+
+    <h3>Informasi Pengajuan</h3>
+
+    <p><strong>Nomor Pengajuan:</strong><br>
+        {{ pengajuan.nomor_pengajuan }}
+    </p>
+
+    <p><strong>Nama Pemohon:</strong><br>
+        {{ pengajuan.nama }}
+    </p>
+
+    <p><strong>Email:</strong><br>
+        {{ pengajuan.email }}
+    </p>
+
+    <p><strong>Layanan:</strong><br>
+        {{ pengajuan.nama_layanan }}
+    </p>
+
+    <p><strong>Status Saat Ini:</strong><br>
+        {{ pengajuan.status.replace('_', ' ').title() }}
+    </p>
+
+    <p><strong>Tanggal Pengajuan:</strong><br>
+        {{ pengajuan.tanggal_pengajuan or '-' }}
+    </p>
+
+    <hr>
+
+    <h3>Data Formulir Pemohon</h3>
+
+    {% if data_formulir %}
+        {% for key, value in data_formulir.items() %}
+            <p>
+                <strong>{{ key.replace('_', ' ').title() }}:</strong><br>
+                {{ value }}
+            </p>
+        {% endfor %}
+    {% else %}
+        <p>Tidak ada data formulir.</p>
+    {% endif %}
+
+    <hr>
+
+    <h3>Dokumen Persyaratan</h3>
+
+    {% if dokumen %}
+        {% for file in dokumen %}
+            <div class="layanan-item">
+                <p><strong>{{ file.nama_file }}</strong></p>
+                <p>Tipe: {{ file.tipe_file }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Belum ada dokumen yang diunggah.</p>
+    {% endif %}
+
+    <hr>
+
+    <h3>Riwayat Perkembangan Pengajuan</h3>
+
+    {% if riwayat %}
+        {% for item in riwayat %}
+            <div class="layanan-item">
+                <p>
+                    <strong>
+                        {{ item.status.replace('_', ' ').title() }}
+                    </strong>
+                </p>
+
+                <p>Petugas: {{ item.nama_aktor or 'Sistem' }}</p>
+                <p>Catatan: {{ item.catatan or '-' }}</p>
+                <p>Waktu: {{ item.created_at }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Belum ada riwayat perkembangan.</p>
+    {% endif %}
+
+    <hr>
+
+    <h3>Dokumen Hasil</h3>
+
+    {% if pengajuan.hasil_dokumen %}
+        <p>Nama file: {{ pengajuan.hasil_dokumen }}</p>
+        <p>Pengajuan sudah memiliki dokumen hasil.</p>
+    {% else %}
+        <p>Dokumen hasil belum tersedia.</p>
+    {% endif %}
+
+    <hr>
+
+    <a href="{{ url_for('admin_status_pengajuan') }}">
+        Kembali ke Kelola Status Pengajuan
+    </a>
+
+</div>
+
+{% endblock %}

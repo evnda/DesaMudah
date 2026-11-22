@@ -1,3 +1,4 @@
+
 {% extends 'base.html' %}
 
 {% block title %}Dashboard Kepala Desa{% endblock %}
@@ -6,18 +7,59 @@
 <div class="form-card">
     <h2>Dashboard Kepala Desa</h2>
     <h3>Halo, {{ session.get('nama') }}!</h3>
-    <p>Selamat datang di halaman Kepala Desa.</p>
+    <p>Selamat datang di halaman Kepala Desa DesaMudah.</p>
 
-    <ul>
-        <li>Pengajuan Menunggu Persetujuan</li>
-        <li>Riwayat Persetujuan</li>
-        <li>Rekap Pelayanan Desa</li>
-    </ul>
-<li>
-    <a href="{{ url_for('daftar_persetujuan') }}">
-        Persetujuan Pengajuan
-    </a>
-</li>
+    <hr>
+
+    <h3>Menu Pengelolaan Pengajuan</h3>
+
+    <div class="layanan-item">
+        <h4>1. Semua Pengajuan Diteruskan</h4>
+        <p>Melihat seluruh pengajuan masyarakat yang telah diteruskan oleh Admin kepada Kepala Desa.</p>
+        <a href="{{ url_for('semua_pengajuan_kepala') }}">
+            Lihat Semua Pengajuan
+        </a>
+    </div>
+
+    <div class="layanan-item">
+        <h4>2. Menunggu Persetujuan</h4>
+        <p>Melihat pengajuan yang masih membutuhkan keputusan Kepala Desa.</p>
+        <a href="{{ url_for('daftar_persetujuan') }}">
+            Lihat Pengajuan Menunggu Persetujuan
+        </a>
+    </div>
+
+    <div class="layanan-item">
+        <h4>3. Riwayat Persetujuan</h4>
+        <p>Melihat daftar pengajuan yang sudah disetujui maupun ditolak.</p>
+        <a href="{{ url_for('riwayat_persetujuan') }}">
+            Lihat Riwayat Persetujuan
+        </a>
+    </div>
+
+    <div class="layanan-item">
+        <h4>4. Rekap Pelayanan Desa</h4>
+        <p>
+            Melihat ringkasan jumlah pengajuan dan statistik
+            pelayanan berdasarkan jenis layanan.
+        </p>
+        <a href="{{ url_for('rekap_pelayanan_kepala') }}">
+            Lihat Rekap Pelayanan
+        </a>
+    </div>
+
+    <div class="layanan-item">
+        <h4>5. Statistik Pelayanan Desa</h4>
+        <p>
+            Melihat grafik jumlah pengajuan masyarakat
+            berdasarkan status pelayanan.
+        </p>
+        <a href="{{ url_for('statistik_pelayanan_kepala') }}">
+            Lihat Statistik Pelayanan
+        </a>
+    </div>
+    <hr>
+
     <a href="{{ url_for('logout') }}">Logout</a>
 </div>
 {% endblock %}

@@ -1,3 +1,6 @@
+import re
+import mysql.connector
+from config import Config
 import os
 import json
 import uuid
@@ -19,6 +22,8 @@ from functools import wraps
 from database import get_db_connection
 from config import Config
 from flask import send_from_directory
+from flask import jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -490,6 +495,7 @@ def pengajuan_saya():
 # PENGAJUAN
 # =====================================
 
+
 @app.route('/admin/pengajuan')
 def admin_pengajuan():
     if 'user_id' not in session:
@@ -497,6 +503,21 @@ def admin_pengajuan():
 
     if session.get('role') != 'admin':
         return redirect(url_for('dashboard'))
+
+    # Daftar status yang boleh digunakan sebagai filter
+    daftar_status = {
+        'menunggu_verifikasi': 'Pengajuan Baru',
+        'menunggu_persetujuan': 'Menunggu Persetujuan Kepala Desa',
+        'sedang_diproses': 'Sedang Diproses',
+        'selesai': 'Pengajuan Selesai',
+        'perlu_perbaikan': 'Perlu Perbaikan',
+        'ditolak': 'Ditolak'
+    }
+
+    status_filter = request.args.get('status', '').strip()
+
+    if status_filter not in daftar_status:
+        status_filter = ''
 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -507,8 +528,6 @@ def admin_pengajuan():
                 p.id,
                 p.nomor_pengajuan,
                 p.status,
-                p.catatan_admin,
-                p.hasil_dokumen,
                 p.tanggal_pengajuan,
                 p.updated_at,
                 u.nama,
@@ -516,8 +535,9 @@ def admin_pengajuan():
             FROM pengajuan p
             JOIN users u ON p.user_id = u.id
             JOIN layanan l ON p.layanan_id = l.id
+            WHERE (%s = '' OR p.status = %s)
             ORDER BY p.tanggal_pengajuan DESC
-        """)
+        """, (status_filter, status_filter))
 
         daftar_pengajuan = cursor.fetchall()
 
@@ -527,7 +547,9 @@ def admin_pengajuan():
 
     return render_template(
         'admin_pengajuan.html',
-        pengajuan=daftar_pengajuan
+        pengajuan=daftar_pengajuan,
+        status_filter=status_filter,
+        daftar_status=daftar_status
     )
 
 
@@ -805,6 +827,79 @@ def selesaikan_pengajuan(id):
     return redirect(url_for('detail_admin_pengajuan', id=id))
 
 
+@app.route('/admin/status-pengajuan')
+def admin_status_pengajuan():
+    return redirect(url_for('admin_pengajuan'))
+
+
+
+@app.route('/admin/status-pengajuan/<int:id>')
+def detail_status_pengajuan(id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if session.get('role') != 'admin':
+        return redirect(url_for('dashboard'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                p.*,
+                u.nama,
+                u.email,
+                l.nama_layanan,
+                l.perlu_persetujuan
+            FROM pengajuan p
+            JOIN users u ON p.user_id = u.id
+            JOIN layanan l ON p.layanan_id = l.id
+            WHERE p.id = %s
+        """, (id,))
+
+        pengajuan = cursor.fetchone()
+
+        if pengajuan is None:
+            return "Pengajuan tidak ditemukan", 404
+
+        cursor.execute("""
+            SELECT *
+            FROM dokumen_pengajuan
+            WHERE pengajuan_id = %s
+        """, (id,))
+
+        dokumen = cursor.fetchall()
+
+        cursor.execute("""
+            SELECT
+                r.*,
+                u.nama AS nama_aktor
+            FROM riwayat_status r
+            LEFT JOIN users u ON r.aktor_id = u.id
+            WHERE r.pengajuan_id = %s
+            ORDER BY r.created_at DESC
+        """, (id,))
+
+        riwayat = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        conn.close()
+
+    data_formulir = json.loads(
+        pengajuan['data_formulir'] or '{}'
+    )
+
+    return render_template(
+        'detail_status_pengajuan.html',
+        pengajuan=pengajuan,
+        dokumen=dokumen,
+        riwayat=riwayat,
+        data_formulir=data_formulir
+    )
+
+
 @app.route('/kepala/persetujuan')
 def daftar_persetujuan():
     if 'user_id' not in session:
@@ -1060,6 +1155,49 @@ def buat_notifikasi(cursor, user_id, judul, pesan):
         VALUES (%s, %s, %s)
     """, (user_id, judul, pesan))
 
+
+@app.route('/kepala/riwayat-persetujuan')
+def riwayat_persetujuan():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if session.get('role') != 'kepala_desa':
+        return redirect(url_for('dashboard'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                p.id,
+                p.nomor_pengajuan,
+                p.status,
+                p.tanggal_pengajuan,
+                u.nama,
+                l.nama_layanan,
+                ps.keputusan,
+                ps.catatan
+            FROM persetujuan ps
+            JOIN pengajuan p ON ps.pengajuan_id = p.id
+            JOIN users u ON p.user_id = u.id
+            JOIN layanan l ON p.layanan_id = l.id
+            WHERE ps.pejabat_id = %s
+            ORDER BY p.tanggal_pengajuan DESC
+        """, (session['user_id'],))
+
+        daftar_riwayat = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        conn.close()
+
+    return render_template(
+        'riwayat_persetujuan.html',
+        pengajuan=daftar_riwayat
+    )
+
+
 @app.route('/notifikasi')
 def daftar_notifikasi():
     if 'user_id' not in session:
@@ -1088,6 +1226,170 @@ def daftar_notifikasi():
     return render_template(
         'notifikasi.html',
         notifikasi=daftar
+    )
+
+
+@app.route('/kepala/semua-pengajuan')
+def semua_pengajuan_kepala():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if session.get('role') != 'kepala_desa':
+        return redirect(url_for('dashboard'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                p.id,
+                p.nomor_pengajuan,
+                p.status,
+                p.tanggal_pengajuan,
+                p.updated_at,
+                u.nama,
+                l.nama_layanan
+            FROM pengajuan p
+            JOIN users u ON p.user_id = u.id
+            JOIN layanan l ON p.layanan_id = l.id
+            WHERE EXISTS (
+                SELECT 1
+                FROM riwayat_status rs
+                WHERE rs.pengajuan_id = p.id
+                AND rs.status = 'menunggu_persetujuan'
+            )
+            ORDER BY p.tanggal_pengajuan DESC
+        """)
+
+        daftar_pengajuan = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        conn.close()
+
+    return render_template(
+        'semua_pengajuan_kepala.html',
+        pengajuan=daftar_pengajuan
+    )
+
+
+@app.route('/kepala/rekap-pelayanan')
+def rekap_pelayanan_kepala():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if session.get('role') != 'kepala_desa':
+        return redirect(url_for('dashboard'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # Mengambil ringkasan pengajuan yang pernah diteruskan
+        # kepada Kepala Desa.
+        cursor.execute("""
+            SELECT
+                COUNT(*) AS total_pengajuan,
+
+                COALESCE(SUM(
+                    p.status = 'menunggu_persetujuan'
+                ), 0) AS menunggu,
+
+                COALESCE(SUM(
+                    EXISTS (
+                        SELECT 1
+                        FROM persetujuan ps
+                        WHERE ps.pengajuan_id = p.id
+                        AND ps.keputusan = 'disetujui'
+                    )
+                ), 0) AS disetujui,
+
+                COALESCE(SUM(
+                    EXISTS (
+                        SELECT 1
+                        FROM persetujuan ps
+                        WHERE ps.pengajuan_id = p.id
+                        AND ps.keputusan = 'ditolak'
+                    )
+                ), 0) AS ditolak,
+
+                COALESCE(SUM(
+                    p.status = 'selesai'
+                ), 0) AS selesai
+
+            FROM pengajuan p
+            WHERE EXISTS (
+                SELECT 1
+                FROM riwayat_status rs
+                WHERE rs.pengajuan_id = p.id
+                AND rs.status = 'menunggu_persetujuan'
+            )
+        """)
+
+        ringkasan = cursor.fetchone()
+
+        # Mengambil rekap berdasarkan jenis layanan
+        cursor.execute("""
+            SELECT
+                l.nama_layanan,
+                COUNT(p.id) AS jumlah
+            FROM pengajuan p
+            JOIN layanan l ON p.layanan_id = l.id
+            WHERE EXISTS (
+                SELECT 1
+                FROM riwayat_status rs
+                WHERE rs.pengajuan_id = p.id
+                AND rs.status = 'menunggu_persetujuan'
+            )
+            GROUP BY l.id, l.nama_layanan
+            ORDER BY jumlah DESC
+        """)
+
+        rekap_layanan = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        conn.close()
+
+    return render_template(
+        'rekap_pelayanan_kepala.html',
+        ringkasan=ringkasan,
+        rekap_layanan=rekap_layanan
+    )
+
+@app.route('/kepala/statistik-pelayanan')
+def statistik_pelayanan_kepala():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if session.get('role') != 'kepala_desa':
+        flash('Anda tidak memiliki akses ke halaman ini.', 'danger')
+        return redirect(url_for('dashboard'))
+
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT status, COUNT(*) AS jumlah
+        FROM pengajuan
+        WHERE EXISTS (
+            SELECT 1
+            FROM riwayat_status rs
+            WHERE rs.pengajuan_id = pengajuan.id
+              AND rs.status = 'menunggu_persetujuan'
+        )
+        GROUP BY status
+    """)
+
+    data_statistik = cursor.fetchall()
+
+    cursor.close()
+    connection.close()
+
+    return render_template(
+        'statistik_pelayanan_kepala.html',
+        data_statistik=data_statistik
     )
 
 @app.route('/notifikasi/<int:id>/baca', methods=['POST'])
@@ -1171,5 +1473,153 @@ def logout():
     return redirect(url_for("login"))
 
 
+
+
+def chatbot_jawab(pesan, role=None):
+    pesan = pesan.lower().strip()
+
+    pesan_bersih = re.sub(r'[^\w\s]', ' ', pesan)
+    pesan_bersih = re.sub(r'\s+', ' ', pesan_bersih).strip()
+
+    daftar_role = ['masyarakat', 'admin', 'kepala_desa']
+
+    connection = None
+    cursor = None
+
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT intent, pertanyaan, kata_kunci, jawaban, kategori
+            FROM knowledge_base
+            WHERE status_aktif = 1
+        """)
+
+        data_pengetahuan = cursor.fetchall()
+
+        # Menyamakan penulisan kategori agar tidak sensitif
+        # terhadap huruf besar dan kecil.
+        for data in data_pengetahuan:
+            data['kategori_normal'] = (
+                (data['kategori'] or '').strip().lower()
+            )
+
+        def cari_jawaban(data_list):
+            jawaban_terbaik = None
+            skor_tertinggi = 0
+
+            for data in data_list:
+                kata_kunci = data['kata_kunci'] or ""
+
+                daftar_kata = [
+                    kata.strip().lower()
+                    for kata in kata_kunci.split(',')
+                    if kata.strip()
+                ]
+
+                skor = 0
+
+                for kata in daftar_kata:
+                    kata_bersih = re.sub(
+                        r'[^\w\s]', ' ', kata
+                    )
+                    kata_bersih = re.sub(
+                        r'\s+', ' ', kata_bersih
+                    ).strip()
+
+                    if not kata_bersih:
+                        continue
+
+                    # Kata tunggal harus cocok sebagai satu kata utuh.
+                    if ' ' not in kata_bersih:
+                        if kata_bersih in pesan_bersih.split():
+                            skor += 2
+
+                    # Frasa harus cocok sebagai rangkaian kata.
+                    elif kata_bersih in pesan_bersih:
+                        skor += 3
+
+                if skor > skor_tertinggi:
+                    skor_tertinggi = skor
+                    jawaban_terbaik = data['jawaban']
+
+            return jawaban_terbaik
+
+        role = (role or '').strip().lower()
+
+        # Tahap 1: Cari jawaban khusus sesuai role pengguna.
+        if role in daftar_role:
+
+            pengetahuan_role = [
+                data for data in data_pengetahuan
+                if data['kategori_normal'] == role
+            ]
+
+            jawaban = cari_jawaban(pengetahuan_role)
+
+            if jawaban:
+                return jawaban
+
+        # Tahap 2: Hanya boleh mengambil kategori umum.
+        # Tidak boleh mengambil kategori milik role lain.
+        kategori_umum = ['', 'umum', 'publik', 'pengunjung']
+
+        pengetahuan_umum = [
+            data for data in data_pengetahuan
+            if data['kategori_normal'] in kategori_umum
+        ]
+
+        jawaban = cari_jawaban(pengetahuan_umum)
+
+        if jawaban:
+            return jawaban
+
+        return (
+            "Maaf, saya belum memahami pertanyaan tersebut. "
+            "Silakan gunakan pertanyaan yang lebih spesifik "
+            "sesuai fitur dan hak akses akun Anda."
+        )
+
+    except Exception as e:
+        print("Error chatbot:", e)
+        return "Maaf, chatbot sedang mengalami gangguan. Silakan coba kembali."
+
+    finally:
+        if cursor:
+            cursor.close()
+
+        if connection and connection.is_connected():
+            connection.close()
+
+
+@app.route('/chatbot/pesan', methods=['POST'])
+def chatbot_pesan():
+    data = request.get_json(silent=True) or {}
+
+    pesan = data.get('pesan', '').strip()
+
+    if not pesan:
+        return jsonify({
+            'status': 'error',
+            'jawaban': 'Silakan ketik pertanyaan terlebih dahulu.'
+        }), 400
+
+    # Mengambil role pengguna yang sedang login
+    role = session.get('role')
+
+    # Menampilkan role di terminal Flask
+    print("ROLE CHATBOT:", role)
+
+    # Memproses pertanyaan
+    jawaban = chatbot_jawab(pesan, role)
+
+    return jsonify({
+        'status': 'success',
+        'jawaban': jawaban
+    })
+
+
 if __name__ == "__main__":
     app.run(debug=True)
+

@@ -14,7 +14,13 @@
         <ul>
     <li>   
         <a href="{{ url_for('daftar_notifikasi') }}">
-            Notifikasi Saya
+                Notifikasi Saya
+
+            {% if jumlah_notifikasi > 0 %}
+                <span class="notification-badge">
+                    {{ jumlah_notifikasi }}
+                </span>
+            {% endif %}
         </a>
     </li> 
 
@@ -30,7 +36,12 @@
         </a>
     </li>
 
-    <li>Chatbot DesaMudah</li>
+    <li>
+    <button type="button"
+        onclick="document.getElementById('chatbot-toggle').click()">
+        Buka Chatbot DesaMudah
+    </button>
+</li>
 </ul>
 
     <a href="{{ url_for('logout') }}">Logout</a>
