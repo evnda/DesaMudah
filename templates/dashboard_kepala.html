@@ -1,65 +1,295 @@
 
 {% extends 'base.html' %}
 
-{% block title %}Dashboard Kepala Desa{% endblock %}
+{% block title %}Dashboard Kepala Desa - DesaMudah{% endblock %}
 
 {% block content %}
-<div class="form-card">
-    <h2>Dashboard Kepala Desa</h2>
-    <h3>Halo, {{ session.get('nama') }}!</h3>
-    <p>Selamat datang di halaman Kepala Desa DesaMudah.</p>
 
-    <hr>
+<style>
+    .kepala-dashboard {
+        padding: 20px 0 45px;
+    }
 
-    <h3>Menu Pengelolaan Pengajuan</h3>
+    .kepala-welcome {
+        position: relative;
+        overflow: hidden;
+        padding: 40px;
+        border-radius: 24px;
+        color: white;
+        background: linear-gradient(120deg, #294c35, #668866);
+        margin-bottom: 32px;
+        box-shadow: 0 12px 30px rgba(49, 88, 60, 0.13);
+    }
 
-    <div class="layanan-item">
-        <h4>1. Semua Pengajuan Diteruskan</h4>
-        <p>Melihat seluruh pengajuan masyarakat yang telah diteruskan oleh Admin kepada Kepala Desa.</p>
-        <a href="{{ url_for('semua_pengajuan_kepala') }}">
-            Lihat Semua Pengajuan
-        </a>
-    </div>
+    .kepala-welcome::after {
+        content: "🌳";
+        position: absolute;
+        right: 40px;
+        bottom: -32px;
+        font-size: 145px;
+        opacity: 0.15;
+    }
 
-    <div class="layanan-item">
-        <h4>2. Menunggu Persetujuan</h4>
-        <p>Melihat pengajuan yang masih membutuhkan keputusan Kepala Desa.</p>
-        <a href="{{ url_for('daftar_persetujuan') }}">
-            Lihat Pengajuan Menunggu Persetujuan
-        </a>
-    </div>
+    .kepala-label {
+        display: inline-block;
+        padding: 7px 14px;
+        border-radius: 30px;
+        background: rgba(255,255,255,0.16);
+        font-size: 12px;
+        letter-spacing: 1px;
+        margin-bottom: 15px;
+    }
 
-    <div class="layanan-item">
-        <h4>3. Riwayat Persetujuan</h4>
-        <p>Melihat daftar pengajuan yang sudah disetujui maupun ditolak.</p>
-        <a href="{{ url_for('riwayat_persetujuan') }}">
-            Lihat Riwayat Persetujuan
-        </a>
-    </div>
+    .kepala-welcome h2 {
+        color: white;
+        font-size: 30px;
+        margin: 0 0 12px;
+    }
 
-    <div class="layanan-item">
-        <h4>4. Rekap Pelayanan Desa</h4>
+    .kepala-welcome p {
+        color: #e8f0e5;
+        margin: 0;
+        line-height: 1.8;
+        max-width: 570px;
+    }
+
+    .kepala-heading {
+        margin-bottom: 21px;
+    }
+
+    .kepala-heading h3 {
+        color: #31583c;
+        font-size: 22px;
+        margin: 0 0 7px;
+    }
+
+    .kepala-heading p {
+        color: #788675;
+        font-size: 14px;
+        margin: 0;
+    }
+
+    .kepala-menu-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+    }
+
+    .kepala-menu-card {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        background: white;
+        border: 1px solid #e8eee4;
+        border-radius: 20px;
+        padding: 26px;
+        text-decoration: none;
+        color: inherit;
+        transition: 0.25s ease;
+        box-shadow: 0 5px 18px rgba(48, 75, 56, 0.04);
+    }
+
+    .kepala-menu-card:hover {
+        transform: translateY(-5px);
+        border-color: #a9c3a3;
+        box-shadow: 0 12px 25px rgba(48, 75, 56, 0.10);
+    }
+
+    .kepala-menu-icon {
+        width: 55px;
+        height: 55px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #edf4e9;
+        border-radius: 16px;
+        font-size: 27px;
+        margin-bottom: 18px;
+    }
+
+    .kepala-menu-card h4 {
+        color: #31583c;
+        font-size: 17px;
+        margin: 0 0 10px;
+    }
+
+    .kepala-menu-card p {
+        color: #788675;
+        font-size: 14px;
+        line-height: 1.7;
+        margin: 0 0 19px;
+        flex-grow: 1;
+    }
+
+    .kepala-card-link {
+        color: #527b55;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .kepala-menu-card.featured {
+        background: #f6f8f1;
+        border-color: #dce7d5;
+    }
+
+    .kepala-info {
+        margin-top: 26px;
+        padding: 20px 23px;
+        background: #f2f5eb;
+        border: 1px solid #e5ebdc;
+        border-radius: 16px;
+        color: #61745e;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .kepala-logout {
+        display: inline-flex;
+        margin-top: 25px;
+        padding: 11px 19px;
+        border: 1px solid #e6caca;
+        border-radius: 12px;
+        color: #a34c4c;
+        background: white;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        transition: 0.2s;
+    }
+
+    .kepala-logout:hover {
+        background: #fff2f0;
+        border-color: #dbaaaa;
+    }
+
+    @media (max-width: 700px) {
+        .kepala-menu-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .kepala-welcome {
+            padding: 28px 23px;
+        }
+
+        .kepala-welcome h2 {
+            font-size: 24px;
+        }
+
+        .kepala-welcome::after {
+            right: 5px;
+            font-size: 95px;
+        }
+    }
+</style>
+
+<div class="kepala-dashboard">
+
+    <section class="kepala-welcome">
+        <span class="kepala-label">PANEL KEPALA DESA</span>
+
+        <h2>Selamat Datang, {{ session.get('nama') }}!</h2>
+
         <p>
-            Melihat ringkasan jumlah pengajuan dan statistik
-            pelayanan berdasarkan jenis layanan.
+            Selamat datang di halaman pemantauan DesaMudah.
+            Pantau jalannya pelayanan administrasi, tinjau pengajuan
+            masyarakat, dan ambil keputusan persetujuan melalui satu tempat.
         </p>
-        <a href="{{ url_for('rekap_pelayanan_kepala') }}">
-            Lihat Rekap Pelayanan
-        </a>
+    </section>
+
+    <div class="kepala-heading">
+        <h3>Pusat Pengelolaan Pelayanan</h3>
+        <p>Pilih menu untuk melihat dan mengelola pelayanan desa.</p>
     </div>
 
-    <div class="layanan-item">
-        <h4>5. Statistik Pelayanan Desa</h4>
-        <p>
-            Melihat grafik jumlah pengajuan masyarakat
-            berdasarkan status pelayanan.
-        </p>
-        <a href="{{ url_for('statistik_pelayanan_kepala') }}">
-            Lihat Statistik Pelayanan
-        </a>
-    </div>
-    <hr>
+    <div class="kepala-menu-grid">
 
-    <a href="{{ url_for('logout') }}">Logout</a>
+        <a href="{{ url_for('semua_pengajuan_kepala') }}"
+           class="kepala-menu-card">
+
+            <div class="kepala-menu-icon">📁</div>
+
+            <h4>Semua Pengajuan Diteruskan</h4>
+
+            <p>
+                Melihat seluruh pengajuan masyarakat yang telah
+                diteruskan oleh Admin kepada Kepala Desa.
+            </p>
+
+            <span class="kepala-card-link">Lihat semua pengajuan →</span>
+        </a>
+
+        <a href="{{ url_for('daftar_persetujuan') }}"
+           class="kepala-menu-card featured">
+
+            <div class="kepala-menu-icon">📝</div>
+
+            <h4>Menunggu Persetujuan</h4>
+
+            <p>
+                Tinjau pengajuan yang masih membutuhkan keputusan
+                Kepala Desa untuk proses persetujuan atau penolakan.
+            </p>
+
+            <span class="kepala-card-link">Periksa pengajuan →</span>
+        </a>
+
+        <a href="{{ url_for('riwayat_persetujuan') }}"
+           class="kepala-menu-card">
+
+            <div class="kepala-menu-icon">📜</div>
+
+            <h4>Riwayat Persetujuan</h4>
+
+            <p>
+                Melihat daftar pengajuan yang telah disetujui
+                maupun ditolak beserta riwayat keputusannya.
+            </p>
+
+            <span class="kepala-card-link">Lihat riwayat →</span>
+        </a>
+
+        <a href="{{ url_for('rekap_pelayanan_kepala') }}"
+           class="kepala-menu-card">
+
+            <div class="kepala-menu-icon">📊</div>
+
+            <h4>Rekap Pelayanan Desa</h4>
+
+            <p>
+                Melihat ringkasan jumlah pengajuan dan statistik
+                pelayanan berdasarkan jenis layanan.
+            </p>
+
+            <span class="kepala-card-link">Lihat rekap →</span>
+        </a>
+
+        <a href="{{ url_for('statistik_pelayanan_kepala') }}"
+           class="kepala-menu-card">
+
+            <div class="kepala-menu-icon">📈</div>
+
+            <h4>Statistik Pelayanan Desa</h4>
+
+            <p>
+                Mengamati grafik jumlah pengajuan masyarakat
+                berdasarkan status pelayanan.
+            </p>
+
+            <span class="kepala-card-link">Lihat statistik →</span>
+        </a>
+
+    </div>
+
+    <div class="kepala-info">
+        <strong>🌱 Informasi Pengelolaan Desa</strong><br>
+        Gunakan data pengajuan, riwayat persetujuan, dan statistik
+        pelayanan sebagai bahan pemantauan serta evaluasi pelayanan desa.
+    </div>
+
+    <a href="{{ url_for('logout') }}" class="kepala-logout">
+        ↪ Keluar dari Dashboard
+    </a>
+
 </div>
+
 {% endblock %}

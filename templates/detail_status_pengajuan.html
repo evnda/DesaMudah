@@ -1,3 +1,4 @@
+
 {% extends 'base.html' %}
 
 {% block title %}Detail Status Pengajuan{% endblock %}
@@ -61,10 +62,29 @@
             <div class="layanan-item">
                 <p><strong>{{ file.nama_file }}</strong></p>
                 <p>Tipe: {{ file.tipe_file }}</p>
+
+                <a href="{{ url_for('admin_lihat_dokumen', id=file.id) }}"
+                   target="_blank">
+                    Lihat Dokumen
+                </a>
             </div>
         {% endfor %}
     {% else %}
         <p>Belum ada dokumen yang diunggah.</p>
+    {% endif %}
+
+    <hr>
+
+    <h3>Dokumen Hasil</h3>
+
+    {% if pengajuan.hasil_dokumen %}
+        <p>Nama file: {{ pengajuan.hasil_dokumen }}</p>
+
+        <a href="{{ url_for('admin_unduh_hasil', id=pengajuan.id) }}">
+            Unduh Dokumen Hasil
+        </a>
+    {% else %}
+        <p>Dokumen hasil belum tersedia.</p>
     {% endif %}
 
     <hr>
@@ -87,17 +107,6 @@
         {% endfor %}
     {% else %}
         <p>Belum ada riwayat perkembangan.</p>
-    {% endif %}
-
-    <hr>
-
-    <h3>Dokumen Hasil</h3>
-
-    {% if pengajuan.hasil_dokumen %}
-        <p>Nama file: {{ pengajuan.hasil_dokumen }}</p>
-        <p>Pengajuan sudah memiliki dokumen hasil.</p>
-    {% else %}
-        <p>Dokumen hasil belum tersedia.</p>
     {% endif %}
 
     <hr>

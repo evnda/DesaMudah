@@ -1,76 +1,352 @@
+
 {% extends 'base.html' %}
 
 {% block title %}Formulir Pengajuan - DesaMudah{% endblock %}
 
 {% block content %}
 
-<div class="form-card">
+<style>
+    .pengajuan-page {
+        max-width: 850px;
+        margin: 30px auto;
+        padding: 0 15px 40px;
+        color: #304b38;
+    }
 
-    <h2>Formulir Pengajuan</h2>
+    .pengajuan-header {
+        background: linear-gradient(135deg, #31583c, #648b62);
+        color: white;
+        padding: 35px;
+        border-radius: 20px;
+        margin-bottom: 25px;
+        box-shadow: 0 8px 22px rgba(49, 88, 60, 0.13);
+    }
 
-    <h3>{{ layanan.nama_layanan }}</h3>
+    .pengajuan-header .eyebrow {
+        font-size: 13px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        opacity: 0.8;
+        margin-bottom: 10px;
+    }
 
-    <p>Silakan lengkapi data berikut untuk mengajukan layanan.</p>
+    .pengajuan-header h2 {
+        margin: 0 0 10px;
+        font-size: 27px;
+    }
+
+    .pengajuan-header p {
+        margin: 0;
+        line-height: 1.7;
+        color: #edf4e9;
+    }
+
+    .layanan-label {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 9px 15px;
+        background: rgba(255,255,255,0.16);
+        border: 1px solid rgba(255,255,255,0.25);
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .pengajuan-card {
+        background: #fff;
+        padding: 30px;
+        border-radius: 18px;
+        margin-bottom: 22px;
+        border: 1px solid #e8eee4;
+        box-shadow: 0 5px 18px rgba(48, 75, 56, 0.05);
+    }
+
+    .section-heading {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+        padding-bottom: 17px;
+        border-bottom: 1px solid #edf1e9;
+    }
+
+    .section-number {
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eaf1e4;
+        color: #31583c;
+        border-radius: 12px;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .section-heading h3 {
+        margin: 0 0 4px;
+        font-size: 18px;
+        color: #31583c;
+    }
+
+    .section-heading p {
+        margin: 0;
+        color: #788675;
+        font-size: 13px;
+    }
+
+    .form-group {
+        margin-bottom: 21px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        color: #405c45;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px 14px;
+        border: 1px solid #dce5d8;
+        border-radius: 10px;
+        background: #fcfdfb;
+        color: #304b38;
+        font-family: inherit;
+        font-size: 14px;
+        transition: 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #648b62;
+        box-shadow: 0 0 0 3px rgba(100,139,98,0.12);
+        background: white;
+    }
+
+    .form-group textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .form-group input[type="file"] {
+        background: #f8faf6;
+        padding: 10px;
+    }
+
+    .form-group input[type="file"]::file-selector-button {
+        border: none;
+        background: #eaf1e4;
+        color: #31583c;
+        padding: 9px 13px;
+        border-radius: 7px;
+        margin-right: 10px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .form-group small {
+        display: block;
+        margin-top: 7px;
+        color: #788675;
+        font-size: 12px;
+    }
+
+    .dokumen-item {
+        padding: 17px;
+        background: #fafbf8;
+        border: 1px solid #e7ede2;
+        border-radius: 12px;
+        margin-bottom: 15px;
+    }
+
+    .dokumen-item p {
+        font-size: 13px;
+        color: #788675;
+        margin: 0 0 12px;
+        line-height: 1.6;
+    }
+
+    .info-upload {
+        padding: 14px 16px;
+        background: #f0f5eb;
+        border-radius: 10px;
+        color: #526e4e;
+        font-size: 13px;
+        line-height: 1.6;
+        margin-top: 18px;
+    }
+
+    .pengajuan-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        margin-top: 25px;
+    }
+
+    .btn-kirim {
+        border: none;
+        background: #527b55;
+        color: white;
+        padding: 13px 25px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .btn-kirim:hover {
+        background: #31583c;
+        transform: translateY(-2px);
+    }
+
+    @media (max-width: 600px) {
+        .pengajuan-header {
+            padding: 25px 20px;
+        }
+
+        .pengajuan-header h2 {
+            font-size: 23px;
+        }
+
+        .pengajuan-card {
+            padding: 20px;
+        }
+
+        .pengajuan-actions {
+            flex-direction: column;
+        }
+
+        .btn-kirim {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="pengajuan-page">
+
+    <div class="pengajuan-header">
+        <div class="eyebrow">DesaMudah · Pelayanan Online</div>
+        <h2>Formulir Pengajuan Layanan</h2>
+        <p>
+            Silakan lengkapi informasi di bawah ini dengan benar
+            agar pengajuan layanan dapat diproses oleh pihak desa.
+        </p>
+
+        <div class="layanan-label">
+            {{ layanan.nama_layanan }}
+        </div>
+    </div>
 
     <form method="POST" enctype="multipart/form-data">
 
-        <label>Nama Lengkap</label>
-        <input
-            type="text"
-            name="nama_lengkap"
-            value="{{ session.get('nama', '') }}"
-            required
-        >
-
-        <label>NIK (Data Dummy)</label>
-        <input
-            type="text"
-            name="nik_dummy"
-            placeholder="Masukkan NIK simulasi"
-        >
-
-        <label>Alamat</label>
-        <textarea name="alamat" required></textarea>
-
-        <label>Nomor HP</label>
-        <input type="text" name="no_hp" required>
-
-        <label>Keterangan Tambahan</label>
-        <textarea name="keterangan"></textarea>
-
-        <hr>
-
-        <h3>Upload Dokumen Persyaratan</h3>
-
-        {% for item in persyaratan %}
-
-            <div class="form-group">
-
-                <label>
-                    {{ loop.index }}. {{ item.nama_persyaratan }}
-                </label>
-
-                <p>{{ item.keterangan }}</p>
-
-                <input
-                    type="file"
-                    name="dokumen"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    required
-                >
-
+        <div class="pengajuan-card">
+            <div class="section-heading">
+                <div class="section-number">01</div>
+                <div>
+                    <h3>Data Pemohon</h3>
+                    <p>Lengkapi identitas diri kamu.</p>
+                </div>
             </div>
 
-        {% endfor %}
+            <div class="form-group">
+                <label>Nama Lengkap</label>
+                <input
+                    type="text"
+                    name="nama_lengkap"
+                    value="{{ session.get('nama', '') }}"
+                    placeholder="Masukkan nama lengkap"
+                    required
+                >
+            </div>
 
-        <p>Format PDF/JPG/PNG, maksimal 2 MB per dokumen.</p>
+            <div class="form-group">
+                <label>NIK (Data Dummy)</label>
+                <input
+                    type="text"
+                    name="nik_dummy"
+                    placeholder="Masukkan NIK simulasi"
+                >
+                <small>Gunakan data simulasi untuk keperluan demonstrasi aplikasi.</small>
+            </div>
 
-        <button type="submit">
-            Kirim Pengajuan
-        </button>
+            <div class="form-group">
+                <label>Alamat</label>
+                <textarea
+                    name="alamat"
+                    placeholder="Masukkan alamat lengkap"
+                    required
+                ></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Nomor HP</label>
+                <input
+                    type="text"
+                    name="no_hp"
+                    placeholder="Contoh: 08xxxxxxxxxx"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label>Keterangan Tambahan</label>
+                <textarea
+                    name="keterangan"
+                    placeholder="Tuliskan keterangan tambahan jika ada..."
+                ></textarea>
+            </div>
+        </div>
+
+        <div class="pengajuan-card">
+            <div class="section-heading">
+                <div class="section-number">02</div>
+                <div>
+                    <h3>Dokumen Persyaratan</h3>
+                    <p>Unggah dokumen sesuai persyaratan layanan.</p>
+                </div>
+            </div>
+
+            {% for item in persyaratan %}
+                <div class="dokumen-item">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>
+                            {{ loop.index }}. {{ item.nama_persyaratan }}
+                        </label>
+
+                        <p>{{ item.keterangan }}</p>
+
+                        <input
+                            type="file"
+                            name="dokumen"
+                            accept=".pdf,.jpg,.jpeg,.png"
+                            required
+                        >
+                    </div>
+                </div>
+            {% endfor %}
+
+            <div class="info-upload">
+                <strong>Informasi Upload</strong><br>
+                Format file yang diperbolehkan: PDF, JPG, JPEG, dan PNG.
+                Ukuran maksimal 2 MB untuk setiap dokumen.
+            </div>
+        </div>
+
+        <div class="pengajuan-actions">
+            <button type="submit" class="btn-kirim">
+                Kirim Pengajuan &nbsp; →
+            </button>
+        </div>
 
     </form>
-
 </div>
 
 {% endblock %}

@@ -1,76 +1,162 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>{% block title %}DesaMudah{% endblock %}</title>
+
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-    <nav class="navbar">
-        <a href="{{ url_for('index') }}" class="brand">DesaMudah</a>
-
-        <div>
-            {% if session.get('user_id') %}
-                <a href="{{ url_for('dashboard') }}">Dashboard</a>
-                <a href="{{ url_for('logout') }}">Keluar</a>
-            {% else %}
-                <a href="{{ url_for('login') }}">Login</a>
-                <a href="{{ url_for('register') }}">Daftar</a>
-            {% endif %}
-        </div>
-    </nav>
-
-    <main class="container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% for category, message in messages %}
-                <div class="message {{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endwith %}
-
-        {% block content %}{% endblock %}
-    </main>
-
-    </main>
-
-    <!-- TOMBOL CHATBOT -->
-    <button id="chatbot-toggle" class="chatbot-toggle" type="button">
-        💬
-    </button>
-
-    <!-- JENDELA CHATBOT -->
-    <div id="chatbot-box" class="chatbot-box">
-
-        <div class="chatbot-header">
-            <div>
-                <strong>Chatbot DesaMudah</strong>
-                <small>Asisten layanan desa</small>
-            </div>
-            <button id="chatbot-close" type="button">✕</button>
-        </div>
-
-        <div id="chatbot-messages" class="chatbot-messages">
-            <div class="chat-message bot">
-                Halo! Selamat datang di DesaMudah.
-                Ada yang bisa saya bantu?
-            </div>
-        </div>
-
-        <form id="chatbot-form" class="chatbot-form">
-            <input
-                type="text"
-                id="chatbot-input"
-                placeholder="Tulis pertanyaan..."
-                autocomplete="off"
-                required
-            >
-            <button type="submit">Kirim</button>
-        </form>
-
-    </div>
 
     <style>
+        :root {
+            --green-dark: #31583c;
+            --green-main: #527b55;
+            --green-light: #eaf1e4;
+            --cream: #f7f7ef;
+            --text-dark: #304b38;
+            --text-muted: #788675;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--cream);
+            color: var(--text-dark);
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        /* NAVBAR */
+
+        .navbar {
+            min-height: 76px;
+            padding: 0 6%;
+            background: rgba(255,255,255,.96);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 1px solid #e9eee4;
+            box-shadow: 0 3px 15px rgba(49,88,60,.04);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--green-dark);
+            text-decoration: none;
+            font-size: 23px;
+            font-weight: 800;
+            letter-spacing: -.5px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 13px;
+            background: var(--green-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 23px;
+        }
+
+        .brand small {
+            display: block;
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: .5px;
+            margin-top: 2px;
+        }
+
+        .navbar-menu {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-menu a {
+            color: #617260;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 11px 16px;
+            border-radius: 9px;
+            transition: .2s;
+        }
+
+        .navbar-menu a:hover {
+            color: var(--green-dark);
+            background: var(--green-light);
+        }
+
+        .navbar-menu a.nav-primary {
+            color: white;
+            background: var(--green-main);
+            padding: 11px 21px;
+        }
+
+        .navbar-menu a.nav-primary:hover {
+            background: var(--green-dark);
+        }
+
+        /* MAIN CONTENT */
+
+        .container {
+            width: 100%;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 32px 25px 55px;
+            min-height: 65vh;
+        }
+
+        /* NOTIFICATION */
+
+        .message {
+            padding: 14px 18px;
+            margin-bottom: 18px;
+            border-radius: 11px;
+            font-size: 14px;
+            border: 1px solid transparent;
+        }
+
+        .message.success {
+            background: #e8f4e8;
+            color: #35643c;
+            border-color: #d2e8d2;
+        }
+
+        .message.error,
+        .message.danger {
+            background: #fcebea;
+            color: #a33d36;
+            border-color: #f4d2cf;
+        }
+
+        .message.warning {
+            background: #fff5df;
+            color: #8c6924;
+            border-color: #f3e5bc;
+        }
+
+        .message.info {
+            background: #edf3e8;
+            color: #496c48;
+            border-color: #dce9d5;
+        }
+
+        /* CHATBOT BUTTON */
+
         .chatbot-toggle {
             position: fixed;
             bottom: 25px;
@@ -79,29 +165,38 @@
             height: 60px;
             border: none;
             border-radius: 50%;
-            background: #2563eb;
+            background: var(--green-main);
             color: white;
-            font-size: 27px;
+            font-size: 26px;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,.2);
+            box-shadow: 0 5px 18px rgba(49,88,60,.25);
             z-index: 9999;
+            transition: .2s;
         }
+
+        .chatbot-toggle:hover {
+            background: var(--green-dark);
+            transform: translateY(-3px);
+        }
+
+        /* CHATBOT WINDOW */
 
         .chatbot-box {
             display: none;
             position: fixed;
             bottom: 100px;
             right: 25px;
-            width: 340px;
+            width: 350px;
             max-width: calc(100vw - 30px);
             height: 450px;
             max-height: calc(100vh - 130px);
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 25px rgba(0,0,0,.2);
+            border-radius: 17px;
+            box-shadow: 0 8px 30px rgba(39,68,43,.2);
             overflow: hidden;
             z-index: 9999;
             flex-direction: column;
+            border: 1px solid #e5ecdf;
         }
 
         .chatbot-box.active {
@@ -109,25 +204,33 @@
         }
 
         .chatbot-header {
-            background: #2563eb;
+            background: var(--green-dark);
             color: white;
-            padding: 15px;
+            padding: 17px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
+        .chatbot-header strong {
+            font-size: 15px;
+        }
+
         .chatbot-header small {
             display: block;
-            margin-top: 4px;
-            opacity: .85;
+            margin-top: 5px;
+            color: #dce9d5;
+            font-size: 12px;
         }
 
         .chatbot-header button {
             border: none;
-            background: transparent;
+            background: rgba(255,255,255,.13);
             color: white;
-            font-size: 20px;
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            font-size: 17px;
             cursor: pointer;
         }
 
@@ -135,57 +238,91 @@
             flex: 1;
             padding: 15px;
             overflow-y: auto;
-            background: #f8fafc;
+            background: #f7f8f2;
         }
 
         .chat-message {
-            padding: 10px 12px;
+            padding: 11px 13px;
             margin-bottom: 12px;
             border-radius: 12px;
             max-width: 85%;
-            font-size: 14px;
-            line-height: 1.5;
+            font-size: 13px;
+            line-height: 1.6;
             white-space: pre-wrap;
             overflow-wrap: anywhere;
         }
 
         .chat-message.bot {
-            background: #e2e8f0;
-            color: #1e293b;
+            background: #e9f0e3;
+            color: #354f38;
             margin-right: auto;
+            border-bottom-left-radius: 3px;
         }
 
         .chat-message.user {
-            background: #2563eb;
+            background: var(--green-main);
             color: white;
             margin-left: auto;
+            border-bottom-right-radius: 3px;
         }
 
         .chatbot-form {
             display: flex;
             padding: 12px;
             gap: 8px;
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid #e8ede3;
+            background: white;
         }
 
         .chatbot-form input {
             flex: 1;
             min-width: 0;
-            padding: 10px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
+            padding: 11px;
+            border: 1px solid #dce5d7;
+            border-radius: 9px;
+            outline: none;
+            font-size: 13px;
+        }
+
+        .chatbot-form input:focus {
+            border-color: var(--green-main);
         }
 
         .chatbot-form button {
-            background: #2563eb;
+            background: var(--green-main);
             color: white;
             border: none;
-            border-radius: 8px;
-            padding: 10px 13px;
+            border-radius: 9px;
+            padding: 10px 15px;
             cursor: pointer;
+            font-weight: 600;
         }
 
-        @media (max-width: 480px) {
+        .chatbot-form button:hover {
+            background: var(--green-dark);
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 650px) {
+            .navbar {
+                padding: 13px 18px;
+                flex-wrap: wrap;
+            }
+
+            .navbar-menu {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .navbar-menu a {
+                padding: 9px 12px;
+            }
+
+            .container {
+                padding: 22px 15px 40px;
+            }
+
             .chatbot-box {
                 right: 15px;
                 bottom: 90px;
@@ -197,6 +334,105 @@
             }
         }
     </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+
+        <a href="{{ url_for('index') }}" class="brand">
+            <span class="brand-icon">🌿</span>
+            <span>
+                DesaMudah
+                <small>PELAYANAN DESA DIGITAL</small>
+            </span>
+        </a>
+
+        <div class="navbar-menu">
+
+            {% if session.get('user_id') %}
+
+                <a href="{{ url_for('dashboard') }}">
+                    Dashboard
+                </a>
+
+                <a href="{{ url_for('logout') }}" class="nav-primary">
+                    Keluar
+                </a>
+
+            {% else %}
+
+                <a href="{{ url_for('login') }}">
+                    Masuk
+                </a>
+
+                <a href="{{ url_for('register') }}" class="nav-primary">
+                    Daftar
+                </a>
+
+            {% endif %}
+
+        </div>
+    </nav>
+
+    <!-- KONTEN HALAMAN -->
+    <main class="container">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="message {{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+
+    </main>
+
+    <!-- TOMBOL CHATBOT -->
+    <button id="chatbot-toggle"
+            class="chatbot-toggle"
+            type="button"
+            aria-label="Buka chatbot">
+        💬
+    </button>
+
+    <!-- JENDELA CHATBOT -->
+    <div id="chatbot-box" class="chatbot-box">
+
+        <div class="chatbot-header">
+            <div>
+                <strong>🌿 Chatbot DesaMudah</strong>
+                <small>Asisten pelayanan desa</small>
+            </div>
+
+            <button id="chatbot-close" type="button">✕</button>
+        </div>
+
+        <div id="chatbot-messages" class="chatbot-messages">
+            <div class="chat-message bot">
+                Halo! Selamat datang di DesaMudah.
+
+                Ada yang bisa saya bantu?
+            </div>
+        </div>
+
+        <form id="chatbot-form" class="chatbot-form">
+
+            <input
+                type="text"
+                id="chatbot-input"
+                placeholder="Tulis pertanyaan..."
+                autocomplete="off"
+                required
+            >
+
+            <button type="submit">Kirim</button>
+
+        </form>
+    </div>
 
     <script>
         const chatbotToggle = document.getElementById('chatbot-toggle');
@@ -253,6 +489,7 @@
                 );
 
                 const hasil = await response.json();
+
                 loading.textContent = hasil.jawaban ||
                     'Maaf, terjadi kesalahan.';
 

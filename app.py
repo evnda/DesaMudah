@@ -1,30 +1,26 @@
 import re
-import mysql.connector
-from config import Config
 import os
 import json
 import uuid
+import mysql.connector
+
 from datetime import datetime
+from functools import wraps
+
+from config import Config
+from database import get_db_connection
+
 from werkzeug.utils import secure_filename
-from flask import (
-    render_template, redirect, url_for,
-    session, request, flash, current_app
-)
-from flask import (
-    Flask, render_template, request,
-    redirect, url_for, session, flash
-)
 from werkzeug.security import (
     generate_password_hash,
     check_password_hash
 )
-from functools import wraps
-from database import get_db_connection
-from config import Config
-from flask import send_from_directory
-from flask import jsonify
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 
+from flask import (
+    Flask, render_template, redirect, url_for,
+    session, request, flash, current_app,
+    send_from_directory, send_file, jsonify
+)
 app = Flask(__name__)
 app.config.from_object(Config)
 UPLOAD_FOLDER = os.path.join(
@@ -496,6 +492,7 @@ def pengajuan_saya():
 # =====================================
 
 
+
 @app.route('/admin/pengajuan')
 def admin_pengajuan():
     if 'user_id' not in session:
@@ -504,7 +501,88 @@ def admin_pengajuan():
     if session.get('role') != 'admin':
         return redirect(url_for('dashboard'))
 
-    # Daftar status yang boleh digunakan sebagai filter
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                p.id,
+                p.nomor_pengajuan,
+                p.status,
+                p.tanggal_pengajuan,
+                p.updated_at,
+                u.nama,
+                l.nama_layanan
+            FROM pengajuan p
+            JOIN users u ON p.user_id = u.id
+            JOIN layanan l ON p.layanan_id = l.id
+            WHERE p.status = 'menunggu_verifikasi'
+            ORDER BY p.tanggal_pengajuan DESC
+        """)
+
+        daftar_pengajuan = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        conn.close()
+
+    return render_template(
+        'admin_pengajuan.html',
+        pengajuan=daftar_pengajuan,
+        status_filter='menunggu_verifikasi',
+        daftar_status={'menunggu_verifikasi': 'Pengajuan Baru'}
+    )
+
+@app.route('/admin/dokumen-pengajuan/<int:id>')
+def admin_lihat_dokumen(id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if session.get('role') != 'admin':
+        return redirect(url_for('dashboard'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT path_file
+            FROM dokumen_pengajuan
+            WHERE id = %s
+        """, (id,))
+
+        dokumen = cursor.fetchone()
+
+    finally:
+        cursor.close()
+        conn.close()
+
+    if not dokumen or not dokumen['path_file']:
+        return "Dokumen tidak ditemukan.", 404
+
+    folder_dokumen = os.path.abspath(
+        os.path.join(app.root_path, 'uploads', 'dokumen')
+    )
+
+    path_file = os.path.abspath(dokumen['path_file'])
+
+    if os.path.commonpath([folder_dokumen, path_file]) != folder_dokumen:
+        return "Akses dokumen ditolak.", 403
+
+    if not os.path.isfile(path_file):
+        return "File tidak ditemukan di penyimpanan.", 404
+
+    return send_file(path_file, as_attachment=False)
+
+@app.route('/admin/status-pengajuan')
+def admin_status_pengajuan():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if session.get('role') != 'admin':
+        return redirect(url_for('dashboard'))
+
     daftar_status = {
         'menunggu_verifikasi': 'Pengajuan Baru',
         'menunggu_persetujuan': 'Menunggu Persetujuan Kepala Desa',
@@ -546,7 +624,7 @@ def admin_pengajuan():
         conn.close()
 
     return render_template(
-        'admin_pengajuan.html',
+        'admin_status_pengajuan.html',
         pengajuan=daftar_pengajuan,
         status_filter=status_filter,
         daftar_status=daftar_status
@@ -760,10 +838,18 @@ def selesaikan_pengajuan(id):
         flash('Format dokumen harus PDF, JPG, JPEG, atau PNG.', 'error')
         return redirect(url_for('detail_admin_pengajuan', id=id))
 
-    if file.content_length and file.content_length > MAX_FILE_SIZE:
-        flash('Ukuran dokumen maksimal 2 MB.', 'error')
+    # Memeriksa ukuran file secara langsung
+    file.seek(0, os.SEEK_END)
+    ukuran = file.tell()
+    file.seek(0)
+
+    if ukuran == 0:
+        flash('Dokumen tidak boleh kosong.', 'error')
         return redirect(url_for('detail_admin_pengajuan', id=id))
 
+    if ukuran > MAX_FILE_SIZE:
+        flash('Ukuran dokumen hasil maksimal 2 MB.', 'error')
+        return redirect(url_for('detail_admin_pengajuan', id=id))
     nama_file = f"hasil_{id}_{uuid.uuid4().hex}.{ekstensi}"
     path_file = os.path.join(HASIL_FOLDER, nama_file)
 
@@ -825,12 +911,6 @@ def selesaikan_pengajuan(id):
         conn.close()
 
     return redirect(url_for('detail_admin_pengajuan', id=id))
-
-
-@app.route('/admin/status-pengajuan')
-def admin_status_pengajuan():
-    return redirect(url_for('admin_pengajuan'))
-
 
 
 @app.route('/admin/status-pengajuan/<int:id>')
@@ -1155,6 +1235,39 @@ def buat_notifikasi(cursor, user_id, judul, pesan):
         VALUES (%s, %s, %s)
     """, (user_id, judul, pesan))
 
+@app.route('/admin/status-pengajuan/<int:id>/unduh-hasil')
+def admin_unduh_hasil(id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if session.get('role') != 'admin':
+        return redirect(url_for('dashboard'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT hasil_dokumen
+            FROM pengajuan
+            WHERE id = %s
+              AND status = 'selesai'
+        """, (id,))
+
+        data = cursor.fetchone()
+
+    finally:
+        cursor.close()
+        conn.close()
+
+    if not data or not data['hasil_dokumen']:
+        return "Dokumen hasil belum tersedia.", 404
+
+    return send_from_directory(
+        HASIL_FOLDER,
+        data['hasil_dokumen'],
+        as_attachment=True
+    )
 
 @app.route('/kepala/riwayat-persetujuan')
 def riwayat_persetujuan():

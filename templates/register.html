@@ -1,34 +1,315 @@
+
 {% extends 'base.html' %}
 
 {% block title %}Daftar - DesaMudah{% endblock %}
 
 {% block content %}
-<div class="form-card">
-    <h2>Registrasi Masyarakat</h2>
-    <p>Buat akun untuk menggunakan layanan DesaMudah.</p>
 
-    <form method="POST">
-        <label>Nama Lengkap</label>
-        <input type="text" name="nama" required>
+<style>
+    .register-page {
+        padding: 35px 15px 50px;
+        display: flex;
+        justify-content: center;
+    }
 
-        <label>Email</label>
-        <input type="email" name="email" required>
+    .register-wrapper {
+        width: 100%;
+        max-width: 950px;
+        display: grid;
+        grid-template-columns: 0.85fr 1.4fr;
+        background: white;
+        border-radius: 25px;
+        overflow: hidden;
+        border: 1px solid #e8eee4;
+        box-shadow: 0 15px 45px rgba(49, 88, 60, 0.10);
+    }
 
-        <label>Nomor HP</label>
-        <input type="text" name="no_hp">
+    .register-intro {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 38px;
+        color: white;
+        background: linear-gradient(145deg, #31583c, #789777);
+    }
 
-        <label>Alamat</label>
-        <textarea name="alamat"></textarea>
+    .register-intro::after {
+        content: "🌱";
+        position: absolute;
+        right: 5px;
+        bottom: -20px;
+        font-size: 145px;
+        opacity: 0.14;
+        transform: rotate(-15deg);
+    }
 
-        <label>Password</label>
-        <input type="password" name="password" required minlength="8">
+    .register-icon {
+        font-size: 43px;
+        margin-bottom: 20px;
+    }
 
-        <label>Konfirmasi Password</label>
-        <input type="password" name="konfirmasi_password" required>
+    .register-intro h2 {
+        color: white;
+        font-size: 28px;
+        line-height: 1.4;
+        margin: 0 0 15px;
+    }
 
-        <button type="submit">Daftar Sekarang</button>
-    </form>
+    .register-intro p {
+        color: #e8f0e5;
+        font-size: 14px;
+        line-height: 1.9;
+        margin: 0;
+    }
 
-    <p>Sudah punya akun? <a href="{{ url_for('login') }}">Login</a></p>
+    .register-benefit {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255,255,255,0.25);
+        color: #e5eee2;
+        font-size: 13px;
+        line-height: 2;
+    }
+
+    .register-form-section {
+        padding: 38px 42px;
+    }
+
+    .register-form-section h2 {
+        color: #31583c;
+        font-size: 27px;
+        margin: 0 0 8px;
+    }
+
+    .register-description {
+        color: #849080;
+        font-size: 14px;
+        margin: 0 0 25px;
+        line-height: 1.6;
+    }
+
+    .register-form label {
+        display: block;
+        color: #405b43;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 7px;
+    }
+
+    .register-form input,
+    .register-form textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px 14px;
+        border: 1px solid #dfe7dc;
+        border-radius: 10px;
+        outline: none;
+        font-size: 14px;
+        font-family: inherit;
+        background: #fbfcf9;
+        margin-bottom: 17px;
+        transition: 0.2s;
+    }
+
+    .register-form input:focus,
+    .register-form textarea:focus {
+        border-color: #789777;
+        box-shadow: 0 0 0 3px rgba(82, 123, 85, 0.10);
+        background: white;
+    }
+
+    .register-form textarea {
+        min-height: 85px;
+        resize: vertical;
+    }
+
+    .register-form button {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 11px;
+        background: #527b55;
+        color: white;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+        margin-top: 5px;
+    }
+
+    .register-form button:hover {
+        background: #31583c;
+        transform: translateY(-2px);
+        box-shadow: 0 7px 16px rgba(49, 88, 60, 0.15);
+    }
+
+    .register-login {
+        text-align: center;
+        margin-top: 22px;
+        color: #849080;
+        font-size: 14px;
+    }
+
+    .register-login a {
+        color: #527b55;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .register-login a:hover {
+        text-decoration: underline;
+    }
+
+    .register-note {
+        color: #849080;
+        font-size: 12px;
+        margin: -7px 0 17px;
+    }
+
+    @media (max-width: 750px) {
+        .register-wrapper {
+            grid-template-columns: 1fr;
+        }
+
+        .register-intro {
+            padding: 28px;
+        }
+
+        .register-intro h2 {
+            font-size: 24px;
+        }
+
+        .register-icon {
+            font-size: 34px;
+            margin-bottom: 12px;
+        }
+
+        .register-benefit {
+            margin-top: 18px;
+        }
+
+        .register-form-section {
+            padding: 30px 25px;
+        }
+    }
+</style>
+
+<div class="register-page">
+
+    <div class="register-wrapper">
+
+        <section class="register-intro">
+
+            <div class="register-icon">🏡</div>
+
+            <h2>Bergabung dengan DesaMudah</h2>
+
+            <p>
+                Buat akun dan nikmati kemudahan mengakses
+                pelayanan administrasi desa secara online.
+                Tidak perlu lagi bingung mencari informasi layanan.
+            </p>
+
+            <div class="register-benefit">
+                ✓ Akses informasi layanan desa<br>
+                ✓ Ajukan administrasi secara online<br>
+                ✓ Pantau status pengajuan kapan saja
+            </div>
+
+        </section>
+
+        <section class="register-form-section">
+
+            <h2>Buat Akun Baru</h2>
+
+            <p class="register-description">
+                Lengkapi data berikut untuk membuat akun masyarakat.
+            </p>
+
+            <form method="POST" class="register-form">
+
+                <label for="nama">Nama Lengkap</label>
+                <input
+                    type="text"
+                    id="nama"
+                    name="nama"
+                    placeholder="Masukkan nama lengkap"
+                    autocomplete="name"
+                    required
+                >
+
+                <label for="email">Email</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="contoh@email.com"
+                    autocomplete="email"
+                    required
+                >
+
+                <label for="no_hp">Nomor HP</label>
+                <input
+                    type="text"
+                    id="no_hp"
+                    name="no_hp"
+                    placeholder="Masukkan nomor HP"
+                    autocomplete="tel"
+                >
+
+                <label for="alamat">Alamat</label>
+                <textarea
+                    id="alamat"
+                    name="alamat"
+                    placeholder="Masukkan alamat tempat tinggal"
+                    autocomplete="street-address"
+                ></textarea>
+
+                <label for="password">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Minimal 8 karakter"
+                    minlength="8"
+                    autocomplete="new-password"
+                    required
+                >
+
+                <p class="register-note">
+                    Password harus terdiri dari minimal 8 karakter.
+                </p>
+
+                <label for="konfirmasi_password">
+                    Konfirmasi Password
+                </label>
+
+                <input
+                    type="password"
+                    id="konfirmasi_password"
+                    name="konfirmasi_password"
+                    placeholder="Masukkan ulang password"
+                    autocomplete="new-password"
+                    required
+                >
+
+                <button type="submit">
+                    Daftar Sekarang →
+                </button>
+
+            </form>
+
+            <div class="register-login">
+                Sudah punya akun?
+                <a href="{{ url_for('login') }}">Masuk di sini</a>
+            </div>
+
+        </section>
+
+    </div>
+
 </div>
+
 {% endblock %}

@@ -1,29 +1,250 @@
 
 {% extends 'base.html' %}
 
-{% block title %}Dashboard Admin{% endblock %}
+{% block title %}Dashboard Admin - DesaMudah{% endblock %}
 
 {% block content %}
-<div class="form-card">
-    <h2>Dashboard Admin Desa</h2>
-    <h3>Halo, {{ session.get('nama') }}!</h3>
-    <p>Selamat datang di halaman administrasi DesaMudah.</p>
 
-    <h3>Menu Administrasi</h3>
+<style>
+    .admin-dashboard {
+        padding: 20px 0 45px;
+    }
 
-    <ul>
-        <li>
-            <a href="{{ url_for('admin_pengajuan') }}">
-                Verifikasi dan Kelola Pengajuan Masyarakat
-            </a>
-        </li>
-        <li>
-            <a href="{{ url_for('admin_status_pengajuan') }}">
-                Kelola Status Pengajuan
-            </a>
-        </li>
-    </ul>
+    .admin-welcome {
+        position: relative;
+        overflow: hidden;
+        padding: 38px;
+        border-radius: 24px;
+        color: white;
+        background: linear-gradient(120deg, #31583c, #638765);
+        margin-bottom: 30px;
+        box-shadow: 0 12px 30px rgba(49, 88, 60, 0.13);
+    }
 
-    <a href="{{ url_for('logout') }}">Logout</a>
+    .admin-welcome::after {
+        content: "🌿";
+        position: absolute;
+        right: 45px;
+        bottom: -25px;
+        font-size: 130px;
+        opacity: 0.13;
+        transform: rotate(-20deg);
+    }
+
+    .admin-welcome .welcome-label {
+        display: inline-block;
+        padding: 7px 13px;
+        border-radius: 30px;
+        background: rgba(255,255,255,0.16);
+        font-size: 12px;
+        letter-spacing: 1px;
+        margin-bottom: 15px;
+    }
+
+    .admin-welcome h2 {
+        font-size: 30px;
+        margin: 0 0 12px;
+        color: white;
+    }
+
+    .admin-welcome p {
+        margin: 0;
+        color: #e8f0e5;
+        line-height: 1.7;
+        max-width: 550px;
+    }
+
+    .admin-section-heading {
+        margin-bottom: 20px;
+    }
+
+    .admin-section-heading h3 {
+        color: #31583c;
+        font-size: 22px;
+        margin: 0 0 7px;
+    }
+
+    .admin-section-heading p {
+        color: #788675;
+        margin: 0;
+        font-size: 14px;
+    }
+
+    .admin-menu-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 22px;
+    }
+
+    .admin-menu-card {
+        background: #fff;
+        border: 1px solid #e8eee4;
+        border-radius: 20px;
+        padding: 27px;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        transition: 0.25s ease;
+        box-shadow: 0 5px 18px rgba(48, 75, 56, 0.04);
+    }
+
+    .admin-menu-card:hover {
+        transform: translateY(-5px);
+        border-color: #a9c3a3;
+        box-shadow: 0 12px 25px rgba(48, 75, 56, 0.10);
+    }
+
+    .admin-menu-icon {
+        width: 55px;
+        height: 55px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+        background: #edf4e9;
+        font-size: 27px;
+        margin-bottom: 20px;
+    }
+
+    .admin-menu-card h4 {
+        color: #31583c;
+        font-size: 18px;
+        margin: 0 0 10px;
+    }
+
+    .admin-menu-card p {
+        color: #788675;
+        font-size: 14px;
+        line-height: 1.7;
+        margin: 0 0 20px;
+    }
+
+    .admin-menu-link {
+        color: #527b55;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .admin-info {
+        margin-top: 25px;
+        padding: 18px 22px;
+        background: #f2f5eb;
+        border: 1px solid #e5ebdc;
+        border-radius: 16px;
+        color: #61745e;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .admin-logout {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 25px;
+        padding: 11px 19px;
+        border: 1px solid #e6caca;
+        border-radius: 12px;
+        color: #a34c4c;
+        background: white;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        transition: 0.2s;
+    }
+
+    .admin-logout:hover {
+        background: #fff2f0;
+        border-color: #dbaaaa;
+    }
+
+    @media (max-width: 700px) {
+        .admin-menu-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .admin-welcome {
+            padding: 27px 23px;
+        }
+
+        .admin-welcome h2 {
+            font-size: 24px;
+        }
+
+        .admin-welcome::after {
+            right: 5px;
+            font-size: 90px;
+        }
+    }
+</style>
+
+<div class="admin-dashboard">
+
+    <section class="admin-welcome">
+        <span class="welcome-label">ADMINISTRATOR DESA</span>
+
+        <h2>Selamat Datang, {{ session.get('nama') }}!</h2>
+
+        <p>
+            Kelola pelayanan administrasi desa dengan lebih mudah,
+            tertata, dan efisien melalui sistem DesaMudah.
+        </p>
+    </section>
+
+    <div class="admin-section-heading">
+        <h3>Menu Administrasi</h3>
+        <p>Pilih menu yang ingin kamu kelola hari ini.</p>
+    </div>
+
+    <div class="admin-menu-grid">
+
+        <a href="{{ url_for('admin_pengajuan') }}"
+           class="admin-menu-card">
+
+            <div class="admin-menu-icon">📋</div>
+
+            <h4>Verifikasi Pengajuan</h4>
+
+            <p>
+                Periksa data dan dokumen yang dikirim masyarakat,
+                kemudian lakukan verifikasi terhadap pengajuan layanan.
+            </p>
+
+            <span class="admin-menu-link">
+                Buka menu verifikasi →
+            </span>
+
+        </a>
+
+        <a href="{{ url_for('admin_status_pengajuan') }}"
+           class="admin-menu-card">
+
+            <div class="admin-menu-icon">📂</div>
+
+            <h4>Kelola Status Pengajuan</h4>
+
+            <p>
+                Pantau seluruh pengajuan masyarakat dan perbarui
+                status proses pelayanan administrasi desa.
+            </p>
+
+            <span class="admin-menu-link">
+                Buka kelola status →
+            </span>
+
+        </a>
+
+    </div>
+
+    <div class="admin-info">
+        <strong>💡 Informasi Admin</strong><br>
+        Pastikan setiap pengajuan diperiksa dengan teliti agar
+        proses pelayanan administrasi masyarakat berjalan lancar.
+    </div>
+
+    <a href="{{ url_for('logout') }}" class="admin-logout">
+        ↪ Keluar dari Dashboard
+    </a>
+
 </div>
+
 {% endblock %}

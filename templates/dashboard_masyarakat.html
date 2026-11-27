@@ -1,49 +1,310 @@
+
 {% extends 'base.html' %}
 
-{% block title %}Dashboard Masyarakat{% endblock %}
+{% block title %}Dashboard Masyarakat - DesaMudah{% endblock %}
 
 {% block content %}
-<div class="form-card">
-    <h2>Dashboard Masyarakat</h2>
-    <h3>Halo, {{ session.get('nama') }}!</h3>
-    <p>Selamat datang di DesaMudah.</p>
 
-    <p>Silakan gunakan layanan berikut:</p>
-   <ul>
-    <li>
-        <ul>
-    <li>   
-        <a href="{{ url_for('daftar_notifikasi') }}">
-                Notifikasi Saya
+<style>
+    .masyarakat-dashboard {
+        padding: 20px 0 45px;
+    }
 
-            {% if jumlah_notifikasi > 0 %}
-                <span class="notification-badge">
-                    {{ jumlah_notifikasi }}
-                </span>
-            {% endif %}
+    .masyarakat-welcome {
+        position: relative;
+        overflow: hidden;
+        padding: 38px;
+        border-radius: 24px;
+        color: white;
+        background: linear-gradient(120deg, #31583c, #72936d);
+        margin-bottom: 32px;
+        box-shadow: 0 12px 30px rgba(49, 88, 60, 0.12);
+    }
+
+    .masyarakat-welcome::after {
+        content: "🌾";
+        position: absolute;
+        right: 35px;
+        bottom: -30px;
+        font-size: 135px;
+        opacity: 0.15;
+        transform: rotate(-12deg);
+    }
+
+    .welcome-label {
+        display: inline-block;
+        padding: 7px 13px;
+        border-radius: 30px;
+        background: rgba(255,255,255,0.16);
+        font-size: 12px;
+        letter-spacing: 1px;
+        margin-bottom: 15px;
+    }
+
+    .masyarakat-welcome h2 {
+        color: white;
+        font-size: 30px;
+        margin: 0 0 12px;
+    }
+
+    .masyarakat-welcome p {
+        color: #e8f0e5;
+        margin: 0;
+        line-height: 1.7;
+        max-width: 550px;
+    }
+
+    .masyarakat-heading {
+        margin-bottom: 20px;
+    }
+
+    .masyarakat-heading h3 {
+        color: #31583c;
+        font-size: 22px;
+        margin: 0 0 7px;
+    }
+
+    .masyarakat-heading p {
+        color: #788675;
+        margin: 0;
+        font-size: 14px;
+    }
+
+    .masyarakat-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+    }
+
+    .masyarakat-card {
+        display: block;
+        position: relative;
+        padding: 25px;
+        border-radius: 19px;
+        background: white;
+        border: 1px solid #e8eee4;
+        text-decoration: none;
+        color: inherit;
+        transition: 0.25s ease;
+        box-shadow: 0 5px 18px rgba(48, 75, 56, 0.04);
+    }
+
+    .masyarakat-card:hover {
+        transform: translateY(-5px);
+        border-color: #a9c3a3;
+        box-shadow: 0 12px 25px rgba(48, 75, 56, 0.10);
+    }
+
+    .masyarakat-icon {
+        width: 54px;
+        height: 54px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #edf4e9;
+        border-radius: 16px;
+        font-size: 26px;
+        margin-bottom: 17px;
+    }
+
+    .masyarakat-card h4 {
+        color: #31583c;
+        font-size: 17px;
+        margin: 0 0 9px;
+    }
+
+    .masyarakat-card p {
+        color: #788675;
+        font-size: 14px;
+        line-height: 1.7;
+        margin: 0 0 17px;
+    }
+
+    .masyarakat-card .card-link {
+        color: #527b55;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .notification-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 23px;
+        height: 23px;
+        padding: 0 6px;
+        margin-left: 7px;
+        border-radius: 20px;
+        background: #d96a58;
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .masyarakat-chat {
+        cursor: pointer;
+        width: 100%;
+        text-align: left;
+        font-family: inherit;
+    }
+
+    .masyarakat-chat:hover .card-link {
+        color: #31583c;
+    }
+
+    .masyarakat-info {
+        margin-top: 25px;
+        padding: 20px 23px;
+        background: #f2f5eb;
+        border: 1px solid #e5ebdc;
+        border-radius: 16px;
+        color: #61745e;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .masyarakat-logout {
+        display: inline-flex;
+        margin-top: 25px;
+        padding: 11px 19px;
+        border: 1px solid #e6caca;
+        border-radius: 12px;
+        color: #a34c4c;
+        background: white;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        transition: 0.2s;
+    }
+
+    .masyarakat-logout:hover {
+        background: #fff2f0;
+        border-color: #dbaaaa;
+    }
+
+    @media (max-width: 700px) {
+        .masyarakat-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .masyarakat-welcome {
+            padding: 27px 23px;
+        }
+
+        .masyarakat-welcome h2 {
+            font-size: 24px;
+        }
+
+        .masyarakat-welcome::after {
+            right: 5px;
+            font-size: 90px;
+        }
+    }
+</style>
+
+<div class="masyarakat-dashboard">
+
+    <section class="masyarakat-welcome">
+        <span class="welcome-label">PORTAL PELAYANAN MASYARAKAT</span>
+
+        <h2>Halo, {{ session.get('nama') }}! 👋</h2>
+
+        <p>
+            Selamat datang di DesaMudah. Sekarang kamu bisa
+            mengakses informasi layanan, mengajukan administrasi,
+            dan memantau proses pelayanan desa dengan lebih mudah.
+        </p>
+    </section>
+
+    <div class="masyarakat-heading">
+        <h3>Layanan untuk Masyarakat</h3>
+        <p>Pilih layanan yang ingin kamu akses.</p>
+    </div>
+
+    <div class="masyarakat-grid">
+
+        <a href="{{ url_for('daftar_notifikasi') }}"
+           class="masyarakat-card">
+
+            <div class="masyarakat-icon">🔔</div>
+
+            <h4>Notifikasi Saya
+
+                {% if jumlah_notifikasi > 0 %}
+                    <span class="notification-badge">
+                        {{ jumlah_notifikasi }}
+                    </span>
+                {% endif %}
+
+            </h4>
+
+            <p>
+                Lihat pemberitahuan terbaru mengenai pengajuan
+                dan informasi pelayanan desa.
+            </p>
+
+            <span class="card-link">Lihat notifikasi →</span>
         </a>
-    </li> 
 
-    <li>
-        <a href="{{ url_for('daftar_layanan') }}">
-            Informasi Layanan Desa
+        <a href="{{ url_for('daftar_layanan') }}"
+           class="masyarakat-card">
+
+            <div class="masyarakat-icon">🏡</div>
+
+            <h4>Informasi Layanan Desa</h4>
+
+            <p>
+                Temukan berbagai informasi layanan administrasi
+                yang tersedia di desa.
+            </p>
+
+            <span class="card-link">Jelajahi layanan →</span>
         </a>
-    </li>
 
-    <li>
-        <a href="{{ url_for('pengajuan_saya') }}">
-            Pengajuan Saya / Cek Status
+        <a href="{{ url_for('pengajuan_saya') }}"
+           class="masyarakat-card">
+
+            <div class="masyarakat-icon">📄</div>
+
+            <h4>Pengajuan Saya</h4>
+
+            <p>
+                Pantau status pengajuan administrasi dan lihat
+                perkembangan proses pelayananmu.
+            </p>
+
+            <span class="card-link">Cek pengajuan →</span>
         </a>
-    </li>
 
-    <li>
-    <button type="button"
-        onclick="document.getElementById('chatbot-toggle').click()">
-        Buka Chatbot DesaMudah
-    </button>
-</li>
-</ul>
+        <button type="button"
+                class="masyarakat-card masyarakat-chat"
+                onclick="document.getElementById('chatbot-toggle').click()">
 
-    <a href="{{ url_for('logout') }}">Logout</a>
+            <div class="masyarakat-icon">💬</div>
+
+            <h4>Chatbot DesaMudah</h4>
+
+            <p>
+                Dapatkan bantuan dan informasi seputar pelayanan
+                desa melalui chatbot.
+            </p>
+
+            <span class="card-link">Mulai bertanya →</span>
+        </button>
+
+    </div>
+
+    <div class="masyarakat-info">
+        <strong>🌱 Butuh bantuan?</strong><br>
+        Jika masih bingung mengenai persyaratan atau proses
+        pengajuan administrasi, kamu bisa menggunakan Chatbot
+        DesaMudah untuk mendapatkan informasi.
+    </div>
+
+    <a href="{{ url_for('logout') }}" class="masyarakat-logout">
+        ↪ Keluar dari Akun
+    </a>
+
 </div>
+
 {% endblock %}
